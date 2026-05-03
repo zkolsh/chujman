@@ -5,7 +5,7 @@ Crear el archivo `back/.env` con:
 ```
 SERVER_PORT=55500
 JWT_SECRET=AlejandroGuillermoSchujman
-FRONTEND_URL=http://localhost:5173/
+FRONTEND_URL=http://localhost:5173
 DATABASE_URL=file:./dev.db
 ```
 
