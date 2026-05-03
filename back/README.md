@@ -12,6 +12,7 @@ DATABASE_URL=file:./dev.db
 Luego correr los siguientes comandos en esta carpeta:
 ```
 npm install
+npx prisma migrate dev --name init
 npx prisma generate
 ```
 
