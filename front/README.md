@@ -1,3 +1,12 @@
+## bootstrapping
+
+en esta carpeta crear un archivo `.env` con el siguiente contenido:
+```
+VITE_API_URL=http://localhost:55500/api/v1
+```
+
+## ejecución
+
 ejecutar los siguientes comandos en la carpeta front:
 
 ```
