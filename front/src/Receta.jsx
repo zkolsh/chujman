@@ -3,11 +3,11 @@ import React from 'react';
 function Receta({ onLogout }) {
   return (
     <div className="bg-amber-50 min-h-screen text-gray-800 font-sans pb-12">
-      
+
       <nav className="bg-white shadow-sm p-4 mb-8">
         <div className="max-w-4xl mx-auto flex justify-between items-center">
           <span className="text-xl font-bold text-amber-700">Recetas Patrias</span>
-          <button 
+          <button
             onClick={onLogout}
             className="text-sm font-medium text-gray-600 hover:text-gray-900 transition">
             Cerrar Sesión
@@ -16,7 +16,7 @@ function Receta({ onLogout }) {
       </nav>
 
       <main className="max-w-4xl mx-auto bg-white p-6 md:p-10 rounded-xl shadow-lg">
-        
+
         <header className="text-center mb-10">
           <h1 className="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">Pastelitos Caseros</h1>
           <p className="text-lg text-gray-600 italic">La clásica receta patria, con todos los trucos paso a paso y la firma de Paulina.</p>
@@ -25,7 +25,7 @@ function Receta({ onLogout }) {
         <div className="mb-10 rounded-lg overflow-hidden h-64 md:h-80 bg-gray-200 shadow-inner">
           <img src="/pastelitos-membrillo.webp" alt="Pastelitos caseros rellenos de membrillo" className="w-full h-full object-cover" />
         </div>
-        
+
         <div className="bg-amber-100 p-4 rounded-lg -mt-8 mb-12 mx-auto max-w-2xl text-center border border-amber-200">
           <p className="text-sm text-amber-900 font-medium">👉 En esta foto, puedes ver un pastelito cortado mostrando su delicioso relleno de <span className="font-bold">dulce de membrillo</span>.</p>
         </div>
@@ -34,7 +34,7 @@ function Receta({ onLogout }) {
           <section className="md:col-span-1 bg-amber-100 p-6 rounded-xl h-fit shadow-sm border border-amber-200">
             <h2 className="text-2xl font-bold text-amber-900 mb-2 border-b border-amber-300 pb-2">Ingredientes</h2>
             <p className="text-sm text-amber-700 mb-6 font-medium italic">Rinde: 2 docenas</p>
-            
+
             <div className="space-y-6">
               <div>
                 <h3 className="font-bold text-amber-800 mb-2">Para la masa:</h3>
@@ -67,7 +67,7 @@ function Receta({ onLogout }) {
 
           <section className="md:col-span-2">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 border-b border-gray-200 pb-2">Paso a paso</h2>
-            
+
             <ol className="space-y-8 text-gray-700">
               <li className="bg-gray-50 p-5 rounded-lg border border-gray-100">
                 <h4 className="font-bold text-lg text-amber-700 mb-2">1. Preparar la masa</h4>
