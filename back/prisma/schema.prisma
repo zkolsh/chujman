@@ -32,6 +32,7 @@ model Project {
 }
 
 model Archivo {
+  idProject Int
   id    Int @id @default(autoincrement())
   texto String?
   from  ArchivoRelacion[] @relation("from")
