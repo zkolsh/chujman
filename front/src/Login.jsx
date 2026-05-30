@@ -48,51 +48,56 @@ function Login({ onLoginSuccess, onGoToRegister }) {
   };
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-      <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-        <h2 className="text-2xl font-bold text-center text-gray-800 mb-6">Bienvenido de nuevo</h2>
+    <div className="bg-slate-50 min-h-screen flex items-center justify-center p-4">
+      <div className="rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm w-full max-w-md p-8">
+        <div className="flex flex-col space-y-2 text-center mb-8">
+          <div className="text-2xl font-semibold tracking-tight">Bienvenido de nuevo</div>
+          <p className="text-sm text-slate-500">Ingresá tus credenciales para acceder</p>
+        </div>
 
         {errorMsg && (
-          <div className="mb-4 p-3 bg-red-100 text-red-700 text-sm rounded-md text-center">
+          <div className="mb-6 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-md text-center font-medium">
             {errorMsg}
           </div>
         )}
 
         <form className="space-y-4">
-          <div>
-            <label htmlFor="user" className="block text-sm font-medium text-gray-700">Email</label>
+          <div className="space-y-2">
+            <label htmlFor="user" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
             <input
-              type="text" id="user" value={user}
+              type="email" id="user" value={user}
               onChange={(e) => setUser(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+              placeholder="m@ejemplo.com"
             />
           </div>
 
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">Contraseña</label>
+          <div className="space-y-2">
+            <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Contraseña</label>
             <input
               type="password" id="password" value={pass}
               onChange={(e) => setPass(e.target.value)}
-              className="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+              className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+              placeholder="••••••••"
             />
           </div>
 
-          <div>
+          <div className="pt-2">
             <button
               onClick={(e) => autenticar(e)}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition duration-150">
+              className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 disabled:pointer-events-none disabled:opacity-50 bg-slate-900 text-slate-50 hover:bg-slate-900/90 h-9 px-4 py-2 w-full shadow"
+            >
               Ingresar
             </button>
           </div>
         </form>
 
-        {/* Botoncito extra para ir al nuevo Register.jsx */}
-        <div className="mt-4 text-center">
+        <div className="mt-6 text-center">
           <button
             onClick={onGoToRegister}
-            className="text-sm text-blue-600 hover:text-blue-500"
+            className="text-sm font-medium text-slate-600 underline-offset-4 hover:text-slate-900 hover:underline"
           >
-            ¿No tienes cuenta? Regístrate aquí
+            ¿No tienes cuenta? Regístrate
           </button>
         </div>
       </div>
