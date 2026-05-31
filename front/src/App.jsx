@@ -4,45 +4,71 @@ import Login from './Login';
 import Register from './Register';
 import Receta from './Receta';
 import PanelProyectos from './PanelProyectos';
+import TableroProyecto from './TableroProyecto';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // Arrancamos mostrando la pantalla de inicio
   const [authView, setAuthView] = useState('inicio');
-  const [activeProjectId, setActiveProjectId] = useState(null);
+  const [activeProject, setActiveProject] = useState(null);
+  const [showEasterEgg, setShowEasterEgg] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      setIsLoggedIn(true);
+      // Validar token y obtener datos del usuario
+      fetch(`${import.meta.env.VITE_API_URL}/auth/validateToken`, {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.user) {
+          localStorage.setItem('userName', data.user.name || '');
+          setIsLoggedIn(true);
+        } else {
+          handleLogout(); // Token inválido
+        }
+      })
+      .catch(() => {
+        // Si hay error de red, asumimos que está logueado temporalmente si hay token
+        setIsLoggedIn(true); 
+      });
     }
   }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
-    setActiveProjectId(null);
+    localStorage.removeItem('userName');
+    setActiveProject(null);
     setIsLoggedIn(false);
-    setAuthView('inicio'); // Al cerrar sesión, lo mandamos al inicio de vuelta
+    setAuthView('inicio');
+    setShowEasterEgg(false);
   };
 
-  const handleSelectProject = (projectId) => {
-    setActiveProjectId(projectId);
-    navigateTo(`project/${projectId}`);
+  const handleSelectProject = (project) => {
+    setActiveProject(project);
+    setShowEasterEgg(false);
   };
 
   const handleLeaveProject = () => {
-    setActiveProjectId(null);
-    navigateTo('dashboard');
+    setActiveProject(null);
+    setShowEasterEgg(false);
   };
+
+  if (showEasterEgg) {
+    return <Receta onLogout={() => setShowEasterEgg(false)} />;
+  }
 
   return (
     <div>
       {isLoggedIn ? (
-        activeProjectId ? (
-          <Receta 
-            projectId={activeProjectId} 
+        activeProject ? (
+          <TableroProyecto 
+            project={activeProject} 
+            onSelectProject={handleSelectProject}
             onBackToDashboard={handleLeaveProject}
-            onLogout={handleLogout} 
+            onLogout={handleLogout}
+            onEasterEgg={() => setShowEasterEgg(true)}
           />
         ) : (
           <PanelProyectos 
@@ -60,7 +86,6 @@ function App() {
           <Login
             onLoginSuccess={() => setIsLoggedIn(true)}
             onGoToRegister={() => setAuthView('register')}
-          // Opcional: podrías pasar un onGoToInicio={() => setAuthView('inicio')} a Login si querés un botón de "Volver"
           />
         ) : (
           <Register

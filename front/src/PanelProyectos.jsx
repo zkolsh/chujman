@@ -58,83 +58,126 @@ function PanelProyectos({ onSelectProject, onLogout }) {
     }
   };
 
+  const handleDeleteProject = async (e, projectId) => {
+    e.stopPropagation(); // Evitar que abra el proyecto al hacer clic en borrar
+    if (!window.confirm("¿Seguro que quieres eliminar este proyecto y TODAS sus tareas?")) return;
+
+    try {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/${projectId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+      const data = await response.json();
+      if (response.ok && data.success) {
+        fetchProjects(); // Recargar la lista
+      } else {
+        alert(data.message || 'Error al eliminar');
+      }
+    } catch (err) {
+      alert('Error de red al eliminar el proyecto');
+    }
+  };
+
   return (
-    <div className="bg-gray-50 min-h-screen text-gray-800">
-      {}
-      <nav className="h-14 bg-white/80 backdrop-blur-md border-b border-slate-200 px-6 flex justify-between items-center sticky top-0 z-10">
-        <div className="text-lg font-semibold text-slate-900 tracking-tight">
-          Mesa de Proyectos
+    <div className="bg-slate-50 min-h-screen text-slate-950 font-sans pb-12">
+      <nav className="h-14 bg-slate-900 text-white px-6 flex justify-between items-center sticky top-0 z-10 shadow-md">
+        <div className="text-lg font-bold tracking-tight">
+          Menú de Proyectos
         </div>
-        <button 
-          onClick={onLogout}
-          className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors border border-slate-200 bg-white hover:bg-slate-100 hover:text-slate-900 h-9 px-4 py-2"
-        >
-          Cerrar Sesión
-        </button>
+        <div className="flex items-center space-x-6">
+          <span className="text-sm font-medium text-slate-300">
+            Hola, <span className="text-white">{localStorage.getItem('userName') || 'Usuario'}</span>
+          </span>
+          <button 
+            onClick={onLogout}
+            className="inline-flex items-center justify-center rounded-md text-xs font-semibold transition-colors border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white h-8 px-4"
+          >
+            Cerrar Sesión
+          </button>
+        </div>
       </nav>
 
-      <main className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8">
-        {}
+      <main className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8 pt-10">
+        
+        {/* Formulario de Nuevo Proyecto */}
         <div className="md:col-span-1">
           <div className="rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm">
-            <div className="flex flex-col space-y-1.5 p-6 pb-4">
-              <div className="text-lg font-semibold leading-none tracking-tight">Nuevo Proyecto</div>
-              <p className="text-sm text-slate-500">Crea un tablero para tus dependencias.</p>
+            <div className="flex flex-col space-y-1.5 p-6">
+              <h3 className="font-semibold leading-none tracking-tight">Nuevo Proyecto</h3>
+              <p className="text-sm text-slate-500">Crea un espacio para tus diagramas</p>
             </div>
             <div className="p-6 pt-0">
-              {errorMsg && (
-                <div className="mb-4 p-3 bg-red-50 border border-red-200 text-red-600 text-sm rounded-md text-center font-medium">{errorMsg}</div>
-              )}
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre</label>
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre del proyecto</label>
                   <input 
-                    type="text" value={name} onChange={(e) => setName(e.target.value)} required
+                    type="text" 
+                    value={name} 
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Ej: Base de Datos II"
                     className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
-                    placeholder="Ej: Lanzamiento de App"
                   />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Descripción</label>
+                  <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Descripción (Opcional)</label>
                   <textarea 
-                    value={description} onChange={(e) => setDescription(e.target.value)} rows="3"
-                    className="flex min-h-[60px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm transition-colors placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
-                    placeholder="Breve resumen de los objetivos..."
+                    value={description} 
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Breve detalle..."
+                    className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
                   />
                 </div>
-                <button type="submit" className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 bg-slate-900 text-slate-50 hover:bg-slate-900/90 h-9 px-4 py-2 w-full shadow">
-                  Crear Tablero
+                <button 
+                  type="submit"
+                  className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 bg-slate-900 text-slate-50 hover:bg-slate-900/90 h-9 px-4 py-2 w-full shadow"
+                >
+                  Crear Proyecto
                 </button>
               </form>
             </div>
           </div>
         </div>
 
-        {}
-        <div className="md:col-span-2 space-y-4">
-          <div className="text-lg font-semibold leading-none tracking-tight mb-4">Tus Tableros de Dependencias</div>
-          
+        {/* Lista de Proyectos */}
+        <div className="md:col-span-2 space-y-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-semibold tracking-tight">Tus Proyectos</h2>
+          </div>
+
           {loading ? (
-            <div className="text-sm text-slate-500">Cargando tableros...</div>
+            <p className="text-sm text-slate-500">Cargando tus proyectos...</p>
           ) : projects.length === 0 ? (
-            <div className="flex h-[200px] flex-col items-center justify-center rounded-md border border-dashed border-slate-200 bg-white p-8 text-center animate-in fade-in-50">
-              <p className="text-sm text-slate-500">No tienes proyectos creados aún. ¡Crea el primero a la izquierda!</p>
+            <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+              <p className="text-slate-500">Aún no tienes proyectos creados.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {projects.map((proj) => (
                 <div 
                   key={proj.id} 
-                  onClick={() => onSelectProject(proj.id)}
-                  className="rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm hover:bg-slate-50 transition-colors cursor-pointer flex flex-col justify-between"
+                  onClick={() => onSelectProject(proj)}
+                  className="rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm hover:bg-slate-50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group relative"
                 >
-                  <div className="p-5">
-                    <div className="font-semibold leading-none tracking-tight mb-2 group-hover:text-slate-900">{proj.name}</div>
+                  <div className="p-6 pr-10">
+                    <h3 className="font-semibold leading-none tracking-tight mb-2 group-hover:text-slate-700 transition-colors">{proj.name}</h3>
                     <p className="text-sm text-slate-500 line-clamp-2">{proj.description || "Sin descripción."}</p>
                   </div>
-                  <div className="px-5 pb-5 pt-0 mt-auto flex justify-between items-center text-xs text-slate-500">
+                  
+                  <button 
+                    onClick={(e) => handleDeleteProject(e, proj.id)}
+                    className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 p-1"
+                    title="Eliminar proyecto"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+                    </svg>
+                  </button>
+
+                  <div className="px-6 pb-6 pt-0 mt-auto flex justify-between items-center text-xs text-slate-500">
                     <span>{new Date(proj.createdAt).toLocaleDateString()}</span>
-                    <span className="font-medium text-slate-900 hover:underline">Ver Grafo &rarr;</span>
+                    <span className="font-medium text-slate-900 opacity-0 group-hover:opacity-100 transition-opacity">Abrir &rarr;</span>
                   </div>
                 </div>
               ))}

@@ -37,7 +37,8 @@ function Login({ onLoginSuccess, onGoToRegister }) {
 
       if (response.ok && data.success) {
         localStorage.setItem('token', data.data.token);
-        onLoginSuccess();
+        localStorage.setItem('userName', data.data.usuario.name);
+        onLoginSuccess(data.data.usuario.name);
       } else {
         setErrorMsg(data.message || 'No coinciden usuario y contraseña');
       }

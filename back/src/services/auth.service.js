@@ -10,7 +10,7 @@ export const authService = {
 			throw new Error('Credenciales incorrectas');
 		}
 
-		const token = generarToken({id: usuario.id, gmail: usuario.gmail});
+		const token = generarToken({id: usuario.id, gmail: usuario.gmail, name: usuario.name});
 		const {password: _, ...usuarioSinPassword} = usuario;
 
 		return {token, usuario: usuarioSinPassword};
@@ -26,7 +26,7 @@ export const authService = {
 			password: hashedPassword
 		});
 
-		const token = generarToken({id: usuario.id, gmail: usuario.gmail});
+		const token = generarToken({id: usuario.id, gmail: usuario.gmail, name: usuario.name});
 		const {password: _, ...usuarioSinPassword} = usuario;
 
 		return {token, usuario: usuarioSinPassword};

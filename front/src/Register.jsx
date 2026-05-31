@@ -32,7 +32,8 @@ function Register({ onRegisterSuccess, onGoToLogin }) {
 
             if (response.ok && data.success) {
                 localStorage.setItem('token', data.data.token);
-                onRegisterSuccess();
+                localStorage.setItem('userName', data.data.usuario.name);
+                onRegisterSuccess(data.data.usuario.name);
             } else {
                 setErrorMsg(data.message || 'Error al registrar el usuario');
             }
