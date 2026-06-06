@@ -3,4 +3,5 @@ Añadimos:
 2) Estados de Tareas y subtareas (No iniciado,En Progreso,Completado)
 3) Mejoras de panel de la izquierda en las Tareas
 4) Solucionada Organizacion del backend
-5) Ahora al crear proyecto si no pones el nombre te insiste que lo pongas.
+5) Ahora en los formularios (register,crear proyecto,login) te marca en rojo que es lo que no llenaste y deberias.
+
