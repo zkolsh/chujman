@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ConfirmModal from './ConfirmModal';
 
 function PanelProyectos({ onSelectProject, onLogout }) {
   const [projects, setProjects] = useState([]);
@@ -6,6 +7,8 @@ function PanelProyectos({ onSelectProject, onLogout }) {
   const [description, setDescription] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
   const [loading, setLoading] = useState(true);
+  const [projectNameError, setProjectNameError] = useState(false);
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, title: '', message: '', onConfirm: null, isDanger: false });
 
   const fetchProjects = async () => {
     try {
@@ -33,7 +36,11 @@ function PanelProyectos({ onSelectProject, onLogout }) {
 
   const handleCreateProject = async (e) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      setProjectNameError(true);
+      return;
+    }
+    setProjectNameError(false);
 
     try {
       const response = await fetch(`${import.meta.env.VITE_API_URL}/projects`, {
@@ -60,24 +67,32 @@ function PanelProyectos({ onSelectProject, onLogout }) {
 
   const handleDeleteProject = async (e, projectId) => {
     e.stopPropagation(); // Evitar que abra el proyecto al hacer clic en borrar
-    if (!window.confirm("¿Seguro que quieres eliminar este proyecto y TODAS sus tareas?")) return;
-
-    try {
-      const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/${projectId}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('token')}`
+    
+    setConfirmConfig({
+      isOpen: true,
+      title: 'Eliminar Proyecto',
+      message: '¿Seguro que quieres eliminar este proyecto y TODAS sus tareas? Esta acción no se puede deshacer.',
+      isDanger: true,
+      onConfirm: async () => {
+        setConfirmConfig({ ...confirmConfig, isOpen: false });
+        try {
+          const response = await fetch(`${import.meta.env.VITE_API_URL}/projects/${projectId}`, {
+            method: 'DELETE',
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+          const data = await response.json();
+          if (response.ok && data.success) {
+            fetchProjects(); // Recargar la lista
+          } else {
+            alert(data.message || 'Error al eliminar');
+          }
+        } catch (err) {
+          alert('Error de red al eliminar el proyecto');
         }
-      });
-      const data = await response.json();
-      if (response.ok && data.success) {
-        fetchProjects(); // Recargar la lista
-      } else {
-        alert(data.message || 'Error al eliminar');
       }
-    } catch (err) {
-      alert('Error de red al eliminar el proyecto');
-    }
+    });
   };
 
   return (
@@ -115,10 +130,16 @@ function PanelProyectos({ onSelectProject, onLogout }) {
                   <input 
                     type="text" 
                     value={name} 
-                    onChange={(e) => setName(e.target.value)}
+                    onChange={(e) => {
+                      setName(e.target.value);
+                      if (e.target.value.trim()) setProjectNameError(false);
+                    }}
                     placeholder="Ej: Base de Datos II"
-                    className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+                    className={`flex h-9 w-full rounded-md border ${projectNameError ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-200 focus-visible:ring-slate-950'} bg-transparent px-3 py-1 text-sm shadow-sm transition-colors placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1`}
                   />
+                  {projectNameError && (
+                    <p className="text-xs text-red-500 mt-1">El nombre es obligatorio.</p>
+                  )}
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Descripción (Opcional)</label>
@@ -185,6 +206,15 @@ function PanelProyectos({ onSelectProject, onLogout }) {
           )}
         </div>
       </main>
+
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        isDanger={confirmConfig.isDanger}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+      />
     </div>
   );
 }

@@ -1,13 +1,9 @@
-import { PrismaClient } from '@prisma/client';
-const prisma = new PrismaClient();
+import { projectService } from '../services/project.service.js';
 
 export const getProjects = async (req, res, next) => {
   try {
     const userId = req.user.id; 
-    const projects = await prisma.project.findMany({
-      where: { userId },
-      orderBy: { createdAt: 'desc' }
-    });
+    const projects = await projectService.getProjects(userId);
 
     res.status(200).json({ success: true, data: projects });
   } catch (error) {
@@ -24,9 +20,7 @@ export const createProject = async (req, res, next) => {
       return res.status(400).json({ success: false, message: 'El nombre es obligatorio' });
     }
 
-    const newProject = await prisma.project.create({
-      data: { name, description, userId }
-    });
+    const newProject = await projectService.createProject(userId, { name, description });
 
     res.status(201).json({ success: true, data: newProject });
   } catch (error) {
@@ -37,41 +31,15 @@ export const createProject = async (req, res, next) => {
 export const deleteProject = async (req, res, next) => {
   try {
     const id = parseInt(req.params.id);
+    const userId = req.user.id;
     
-    // Check if user owns the project
-    const project = await prisma.project.findUnique({ where: { id } });
-    if (!project || project.userId !== req.user.id) {
-      return res.status(403).json({ success: false, message: 'No autorizado' });
-    }
-
-    // Encuentra todos los archivos de este proyecto
-    const archivos = await prisma.archivo.findMany({ where: { idProject: id } });
-    const archivoIds = archivos.map(a => a.id);
-
-    if (archivoIds.length > 0) {
-      // Elimina las relaciones primero para evitar errores de Foreign Key en SQLite
-      await prisma.archivoRelacion.deleteMany({
-        where: {
-          OR: [
-            { fromId: { in: archivoIds } },
-            { toId: { in: archivoIds } }
-          ]
-        }
-      });
-
-      // Elimina los archivos (tareas/subtareas)
-      await prisma.archivo.deleteMany({
-        where: { idProject: id }
-      });
-    }
-
-    // Delete project
-    await prisma.project.delete({
-      where: { id }
-    });
+    await projectService.deleteProject(id, userId);
 
     res.status(200).json({ success: true, message: 'Proyecto eliminado' });
   } catch (error) {
+    if (error.message === 'No autorizado') {
+      return res.status(403).json({ success: false, message: 'No autorizado' });
+    }
     next(error);
   }
 };

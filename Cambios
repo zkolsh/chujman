@@ -1,4 +1,6 @@
 Añadimos:
-Tablas de archivos y conexión entre archivos
-Mejorado front con shadcn  
-Ahora podes crear proyectos,tareas y subtareas
+1) Reemplazamos ventanas que aparecien arriba de la pantalla para confirmar por ventanas en el medio de la pantalla
+2) Estados de Tareas y subtareas (No iniciado,En Progreso,Completado)
+3) Mejoras de panel de la izquierda en las Tareas
+4) Solucionada Organizacion del backend
+5) Ahora al crear proyecto si no pones el nombre te insiste que lo pongas.

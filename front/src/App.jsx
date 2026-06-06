@@ -5,12 +5,16 @@ import Register from './Register';
 import Receta from './Receta';
 import PanelProyectos from './PanelProyectos';
 import TableroProyecto from './TableroProyecto';
+import ConfirmModal from './ConfirmModal';
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authView, setAuthView] = useState('inicio');
   const [activeProject, setActiveProject] = useState(null);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
+  
+  // ConfirmModal state for Logout
+  const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, message: '', onConfirm: null });
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -26,7 +30,7 @@ function App() {
           localStorage.setItem('userName', data.user.name || '');
           setIsLoggedIn(true);
         } else {
-          handleLogout(); // Token inválido
+          executeLogout(); // Token inválido
         }
       })
       .catch(() => {
@@ -36,13 +40,29 @@ function App() {
     }
   }, []);
 
-  const handleLogout = () => {
+  const executeLogout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('userName');
     setActiveProject(null);
     setIsLoggedIn(false);
     setAuthView('inicio');
     setShowEasterEgg(false);
+    setConfirmConfig({ ...confirmConfig, isOpen: false });
+  };
+
+  const handleLogout = (force) => {
+    if (force !== true) {
+      setConfirmConfig({
+        isOpen: true,
+        title: 'Cerrar Sesión',
+        message: '¿Estás seguro que deseas cerrar sesión?',
+        confirmText: 'Cerrar sesión',
+        isDanger: true,
+        onConfirm: executeLogout
+      });
+      return;
+    }
+    executeLogout();
   };
 
   const handleSelectProject = (project) => {
@@ -60,41 +80,53 @@ function App() {
   }
 
   return (
-    <div>
-      {isLoggedIn ? (
-        activeProject ? (
-          <TableroProyecto 
-            project={activeProject} 
-            onSelectProject={handleSelectProject}
-            onBackToDashboard={handleLeaveProject}
-            onLogout={handleLogout}
-            onEasterEgg={() => setShowEasterEgg(true)}
-          />
+    <>
+      <div>
+        {isLoggedIn ? (
+          activeProject ? (
+            <TableroProyecto 
+              project={activeProject} 
+              onSelectProject={handleSelectProject}
+              onBackToDashboard={handleLeaveProject}
+              onLogout={handleLogout}
+              onEasterEgg={() => setShowEasterEgg(true)}
+            />
+          ) : (
+            <PanelProyectos 
+              onSelectProject={handleSelectProject} 
+              onLogout={handleLogout} 
+            />
+          )
         ) : (
-          <PanelProyectos 
-            onSelectProject={handleSelectProject} 
-            onLogout={handleLogout} 
-          />
-        )
-      ) : (
-        authView === 'inicio' ? (
-          <Inicio
-            onGoToLogin={() => setAuthView('login')}
-            onGoToRegister={() => setAuthView('register')}
-          />
-        ) : authView === 'login' ? (
-          <Login
-            onLoginSuccess={() => setIsLoggedIn(true)}
-            onGoToRegister={() => setAuthView('register')}
-          />
-        ) : (
-          <Register
-            onRegisterSuccess={() => setIsLoggedIn(true)}
-            onGoToLogin={() => setAuthView('login')}
-          />
-        )
-      )}
-    </div>
+          authView === 'inicio' ? (
+            <Inicio
+              onGoToLogin={() => setAuthView('login')}
+              onGoToRegister={() => setAuthView('register')}
+            />
+          ) : authView === 'login' ? (
+            <Login
+              onLoginSuccess={() => setIsLoggedIn(true)}
+              onGoToRegister={() => setAuthView('register')}
+            />
+          ) : (
+            <Register
+              onRegisterSuccess={() => setIsLoggedIn(true)}
+              onGoToLogin={() => setAuthView('login')}
+            />
+          )
+        )}
+      </div>
+
+      <ConfirmModal
+        isOpen={confirmConfig.isOpen}
+        title={confirmConfig.title}
+        message={confirmConfig.message}
+        confirmText={confirmConfig.confirmText}
+        isDanger={confirmConfig.isDanger}
+        onConfirm={confirmConfig.onConfirm}
+        onCancel={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
+      />
+    </>
   );
 }
 
