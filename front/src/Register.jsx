@@ -5,17 +5,27 @@ function Register({ onRegisterSuccess, onGoToLogin }) {
     const [user, setUser] = useState('');
     const [pass, setPass] = useState('');
     const [errorMsg, setErrorMsg] = useState('');
+    const [emptyFields, setEmptyFields] = useState([]);
 
     const registrar = async (e) => {
         e.preventDefault();
 
-        if (name.trim() === '' || user.trim() === '' || pass.trim() === '') {
+        const empty = [];
+        if (name.trim() === '') empty.push('name');
+        if (user.trim() === '') empty.push('user');
+        if (pass.trim() === '') empty.push('pass');
+
+        if (empty.length > 0) {
+            setEmptyFields(empty);
             setErrorMsg('Todos los campos son obligatorios');
             return;
         }
 
+        setEmptyFields([]); // Clear error borders
+        
         if (pass.length <= 3) {
             setErrorMsg('La contraseña es demasiado corta');
+            setEmptyFields(['pass']);
             return;
         }
 
@@ -61,8 +71,11 @@ function Register({ onRegisterSuccess, onGoToLogin }) {
                     <div className="space-y-2">
                         <label htmlFor="name" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre</label>
                         <input
-                            type="text" id="name" value={name} onChange={(e) => setName(e.target.value)}
-                            className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+                            type="text" id="name" value={name} onChange={(e) => {
+                                setName(e.target.value);
+                                if (e.target.value.trim() !== '') setEmptyFields(prev => prev.filter(f => f !== 'name'));
+                            }}
+                            className={`flex h-9 w-full rounded-md border ${emptyFields.includes('name') ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-200 focus-visible:ring-slate-950'} bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1`}
                             placeholder="Juan Pérez"
                         />
                     </div>
@@ -70,8 +83,11 @@ function Register({ onRegisterSuccess, onGoToLogin }) {
                     <div className="space-y-2">
                         <label htmlFor="user" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
                         <input
-                            type="email" id="user" value={user} onChange={(e) => setUser(e.target.value)}
-                            className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+                            type="email" id="user" value={user} onChange={(e) => {
+                                setUser(e.target.value);
+                                if (e.target.value.trim() !== '') setEmptyFields(prev => prev.filter(f => f !== 'user'));
+                            }}
+                            className={`flex h-9 w-full rounded-md border ${emptyFields.includes('user') ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-200 focus-visible:ring-slate-950'} bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1`}
                             placeholder="m@ejemplo.com"
                         />
                     </div>
@@ -79,8 +95,11 @@ function Register({ onRegisterSuccess, onGoToLogin }) {
                     <div className="space-y-2">
                         <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Contraseña</label>
                         <input
-                            type="password" id="password" value={pass} onChange={(e) => setPass(e.target.value)}
-                            className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+                            type="password" id="password" value={pass} onChange={(e) => {
+                                setPass(e.target.value);
+                                if (e.target.value.trim() !== '') setEmptyFields(prev => prev.filter(f => f !== 'pass'));
+                            }}
+                            className={`flex h-9 w-full rounded-md border ${emptyFields.includes('pass') ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-200 focus-visible:ring-slate-950'} bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1`}
                             placeholder="••••••••"
                         />
                     </div>

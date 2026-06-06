@@ -4,19 +4,22 @@ function Login({ onLoginSuccess, onGoToRegister }) {
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
   const [errorMsg, setErrorMsg] = useState('');
+  const [emptyFields, setEmptyFields] = useState([]);
 
   const autenticar = async (e) => {
     e.preventDefault();
 
-    if (user.trim() === '' || pass.trim() === '') {
-      setErrorMsg('usuario o password vacio');
+    const empty = [];
+    if (user.trim() === '') empty.push('user');
+    if (pass.trim() === '') empty.push('pass');
+
+    if (empty.length > 0) {
+      setEmptyFields(empty);
+      setErrorMsg('Todos los campos son obligatorios');
       return;
     }
 
-    if (pass.length <= 3) {
-      setErrorMsg('password demasiado corto');
-      return;
-    }
+    setEmptyFields([]);
 
     setErrorMsg('');
 
@@ -67,8 +70,11 @@ function Login({ onLoginSuccess, onGoToRegister }) {
             <label htmlFor="user" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Email</label>
             <input
               type="email" id="user" value={user}
-              onChange={(e) => setUser(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+              onChange={(e) => {
+                setUser(e.target.value);
+                if (e.target.value.trim() !== '') setEmptyFields(prev => prev.filter(f => f !== 'user'));
+              }}
+              className={`flex h-9 w-full rounded-md border ${emptyFields.includes('user') ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-200 focus-visible:ring-slate-950'} bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1`}
               placeholder="m@ejemplo.com"
             />
           </div>
@@ -77,8 +83,11 @@ function Login({ onLoginSuccess, onGoToRegister }) {
             <label htmlFor="password" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Contraseña</label>
             <input
               type="password" id="password" value={pass}
-              onChange={(e) => setPass(e.target.value)}
-              className="flex h-9 w-full rounded-md border border-slate-200 bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
+              onChange={(e) => {
+                setPass(e.target.value);
+                if (e.target.value.trim() !== '') setEmptyFields(prev => prev.filter(f => f !== 'pass'));
+              }}
+              className={`flex h-9 w-full rounded-md border ${emptyFields.includes('pass') ? 'border-red-500 focus-visible:ring-red-500' : 'border-slate-200 focus-visible:ring-slate-950'} bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1`}
               placeholder="••••••••"
             />
           </div>

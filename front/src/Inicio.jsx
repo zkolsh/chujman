@@ -36,11 +36,11 @@ const Inicio = ({ onGoToLogin, onGoToRegister }) => {
                         Organizá tus proyectos y <span className="bg-gradient-to-r from-indigo-400 to-cyan-400 bg-clip-text text-transparent">dividí el trabajo</span>
                     </div>
 
-                    <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-10 leading-relaxed">
+                    <p className="text-lg md:text-xl text-slate-400 max-w-2xl mb-4 leading-relaxed">
                         La plataforma pensada para dividir el trabajo. Creá tus listas de tareas, desglosá los problemas grandes en partes más pequeñas y asignáselas a tus compañeros fácilmente.
                     </p>
 
-                    <div className="flex gap-4 flex-col sm:flex-row">
+                    <div className="flex gap-4 flex-col sm:flex-row mt-12 mb-10">
                         <button
                             onClick={onGoToRegister}
                             className="inline-flex items-center justify-center rounded-md text-base font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-300 bg-slate-50 text-slate-900 hover:bg-slate-200 h-11 px-8 py-2 shadow-lg"
