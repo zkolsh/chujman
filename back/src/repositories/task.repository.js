@@ -27,40 +27,32 @@ export const taskRepository = {
     });
   },
 
-  async createEdge(data) {
-    return await prisma.archivoRelacion.create({
-      data
-    });
-  },
-
-  async findRelationsByFromId(fromId) {
-    return await prisma.archivoRelacion.findMany({
-      where: { fromId }
-    });
-  },
-
-  async deleteRelationsForNodes(nodeIds) {
-    if (nodeIds.length === 0) return;
-    return await prisma.archivoRelacion.deleteMany({
-      where: {
-        OR: [
-          { fromId: { in: nodeIds } },
-          { toId: { in: nodeIds } }
-        ]
-      }
-    });
-  },
-
-  async deleteNodes(nodeIds) {
-    if (nodeIds.length === 0) return;
-    return await prisma.archivo.deleteMany({
-      where: { id: { in: nodeIds } }
+  async deleteNode(id) {
+    return await prisma.archivo.delete({
+      where: { id }
     });
   },
 
   async deleteNodesByProjectId(idProject) {
     return await prisma.archivo.deleteMany({
       where: { idProject }
+    });
+  },
+
+  async createEdge(data) {
+    return await prisma.archivoRelacion.create({
+      data
+    });
+  },
+
+  async deleteSpecificEdge(fromId, toId) {
+    // deleteMany se usa aquí porque no tenemos el ID exacto de la relación,
+    // solo sabemos quiénes la componen.
+    return await prisma.archivoRelacion.deleteMany({
+      where: { 
+        fromId: fromId,
+        toId: toId
+       }
     });
   }
 };

@@ -29,21 +29,6 @@ export const createProjectTask = async (req, res, next) => {
   }
 };
 
-export const createSubtask = async (req, res, next) => {
-  try {
-    const { projectId, taskId } = req.params;
-    const { texto } = req.body;
-
-    const result = await taskService.createSubtask(parseInt(projectId), parseInt(taskId), texto);
-
-    res.status(201).json({ success: true, data: result });
-  } catch (error) {
-    if (error.message === 'El texto es obligatorio') {
-      return res.status(400).json({ success: false, message: error.message });
-    }
-    next(error);
-  }
-};
 
 export const deleteTask = async (req, res, next) => {
   try {
@@ -70,6 +55,36 @@ export const updateTask = async (req, res, next) => {
     if (error.message === 'Estado no válido') {
       return res.status(400).json({ success: false, message: error.message });
     }
+    next(error);
+  }
+};
+
+export const createRelation = async (req, res, next) => {
+  try {
+    const { fromId, toId } = req.body;
+    
+    if (!fromId || !toId) {
+      return res.status(400).json({ success: false, message: 'fromId y toId son obligatorios' });
+    }
+
+    const relation = await taskService.createRelation(parseInt(fromId), parseInt(toId));
+    res.status(201).json({ success: true, data: relation });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteRelation = async (req, res, next) => {
+  try {
+    const { fromId, toId } = req.body;
+
+    if (!fromId || !toId) {
+      return res.status(400).json({ success: false, message: 'fromId y toId son obligatorios' });
+    }
+
+    await taskService.deleteRelation(parseInt(fromId), parseInt(toId));
+    res.status(200).json({ success: true, message: 'Relación eliminada exitosamente' });
+  } catch (error) {
     next(error);
   }
 };

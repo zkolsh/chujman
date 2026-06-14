@@ -10,6 +10,8 @@ dotenv.config();
 
 const app = express();
 
+console.log('attempting to access cors request from ' + process.env.FRONTEND_URL);
+
 app.use(helmet());
 app.use(cors({
 	origin: process.env.FRONTEND_URL || '*',
