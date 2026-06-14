@@ -20,7 +20,7 @@ app.use(cors({
 app.use(express.json());
 app.use(morgan('dev'))
 
-app.use('/api', routes);
+app.use(process.env.NODE_ENV === 'production'? '' : '/api', routes);
 app.use(errorHandler);
 
 export default app;
