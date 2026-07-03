@@ -1,4 +1,17 @@
+/**
+ * @fileoverview Pantalla de registro para nuevos usuarios
+ */
 import React, { useState } from 'react';
+
+/**
+ * Componente que renderiza el formulario de registro.
+ * Permite a nuevos usuarios crear una cuenta ingresando nombre, email y contraseña.
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {(userName: string) => void} props.onRegisterSuccess - Función que se ejecuta cuando el registro es exitoso, recibe el nombre del usuario
+ * @param {() => void} props.onGoToLogin - Función para navegar a la pantalla de inicio de sesión
+ * @returns {JSX.Element}
+ */
 
 function Register({ onRegisterSuccess, onGoToLogin }) {
     const [name, setName] = useState('');
@@ -21,8 +34,15 @@ function Register({ onRegisterSuccess, onGoToLogin }) {
             return;
         }
 
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(user)) {
+            setErrorMsg('Por favor, ingresa un correo electrónico válido');
+            setEmptyFields(['user']);
+            return;
+        }
+
         setEmptyFields([]); // Clear error borders
-        
+
         if (pass.length <= 3) {
             setErrorMsg('La contraseña es demasiado corta');
             setEmptyFields(['pass']);

@@ -1,6 +1,10 @@
+/**
+ * @fileoverview Definición de las rutas REST para la gestión de proyectos
+ */
+
 import express from 'express';
 import { getProjects, createProject, deleteProject } from '../../controllers/project.controller.js';
-import {authMiddleware} from '../../middlewares/auth.js';
+import { authMiddleware } from '../../middlewares/auth.js';
 
 const router = express.Router();
 

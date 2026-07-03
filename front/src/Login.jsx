@@ -1,4 +1,18 @@
+/**
+ * @fileoverview Pantalla de inicio de sesión de usuarios
+ */
+
 import React, { useState } from 'react';
+
+/**
+ * Componente que renderiza el formulario de inicio de sesión.
+ * Permite a los usuarios autenticarse ingresando su email y contraseña.
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {(userName: string) => void} props.onLoginSuccess - Función que se ejecuta cuando el login es exitoso, recibe el nombre del usuario
+ * @param {() => void} props.onGoToRegister - Función para navegar a la pantalla de registro
+ * @returns {JSX.Element}
+ */
 
 function Login({ onLoginSuccess, onGoToRegister }) {
   const [user, setUser] = useState('');

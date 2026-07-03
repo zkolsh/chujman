@@ -1,4 +1,15 @@
+/**
+ * @fileoverview Pantalla especial ("Easter Egg") con una receta patria
+ */
 import React from 'react';
+
+/**
+ * Componente oculto que muestra una receta de pastelitos.
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {() => void} props.onLogout - Función para cerrar sesión o salir de la vista
+ * @returns {JSX.Element}
+ */
 
 function Receta({ onLogout }) {
   return (

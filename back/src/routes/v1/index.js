@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Enrutador que consolida las rutas de la versión 1 de la API
+ */
+
 import { Router } from 'express';
 import authRoutes from './auth.routes.js';
 import projectRoutes from './project.routes.js';

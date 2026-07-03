@@ -1,5 +1,18 @@
+/**
+ * @fileoverview Panel principal donde el usuario puede ver, crear y eliminar sus proyectos
+ */
+
 import React, { useState, useEffect } from 'react';
 import ConfirmModal from './ConfirmModal';
+
+/**
+ * Componente que muestra la lista de proyectos del usuario y permite gestionarlos.
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {(project: Object) => void} props.onSelectProject - Función que se ejecuta al seleccionar un proyecto para abrirlo
+ * @param {() => void} props.onLogout - Función para cerrar la sesión actual
+ * @returns {JSX.Element}
+ */
 
 function PanelProyectos({ onSelectProject, onLogout }) {
   const [projects, setProjects] = useState([]);
@@ -67,7 +80,7 @@ function PanelProyectos({ onSelectProject, onLogout }) {
 
   const handleDeleteProject = async (e, projectId) => {
     e.stopPropagation(); // Evitar que abra el proyecto al hacer clic en borrar
-    
+
     setConfirmConfig({
       isOpen: true,
       title: 'Eliminar Proyecto',
@@ -105,7 +118,7 @@ function PanelProyectos({ onSelectProject, onLogout }) {
           <span className="text-sm font-medium text-slate-300">
             Hola, <span className="text-white">{localStorage.getItem('userName') || 'Usuario'}</span>
           </span>
-          <button 
+          <button
             onClick={onLogout}
             className="inline-flex items-center justify-center rounded-md text-xs font-semibold transition-colors border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white h-8 px-4"
           >
@@ -115,7 +128,7 @@ function PanelProyectos({ onSelectProject, onLogout }) {
       </nav>
 
       <main className="max-w-6xl mx-auto p-6 grid grid-cols-1 md:grid-cols-3 gap-8 pt-10">
-        
+
         {/* Formulario de Nuevo Proyecto */}
         <div className="md:col-span-1">
           <div className="rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm">
@@ -127,9 +140,9 @@ function PanelProyectos({ onSelectProject, onLogout }) {
               <form onSubmit={handleCreateProject} className="space-y-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Nombre del proyecto</label>
-                  <input 
-                    type="text" 
-                    value={name} 
+                  <input
+                    type="text"
+                    value={name}
                     onChange={(e) => {
                       setName(e.target.value);
                       if (e.target.value.trim()) setProjectNameError(false);
@@ -143,14 +156,14 @@ function PanelProyectos({ onSelectProject, onLogout }) {
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Descripción (Opcional)</label>
-                  <textarea 
-                    value={description} 
+                  <textarea
+                    value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Breve detalle..."
                     className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
                   />
                 </div>
-                <button 
+                <button
                   type="submit"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 bg-slate-900 text-slate-50 hover:bg-slate-900/90 h-9 px-4 py-2 w-full shadow"
                 >
@@ -176,8 +189,8 @@ function PanelProyectos({ onSelectProject, onLogout }) {
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {projects.map((proj) => (
-                <div 
-                  key={proj.id} 
+                <div
+                  key={proj.id}
                   onClick={() => onSelectProject(proj)}
                   className="rounded-xl border border-slate-200 bg-white text-slate-950 shadow-sm hover:bg-slate-50 hover:shadow-md transition-all cursor-pointer flex flex-col justify-between group relative"
                 >
@@ -185,8 +198,8 @@ function PanelProyectos({ onSelectProject, onLogout }) {
                     <h3 className="font-semibold leading-none tracking-tight mb-2 group-hover:text-slate-700 transition-colors">{proj.name}</h3>
                     <p className="text-sm text-slate-500 line-clamp-2">{proj.description || "Sin descripción."}</p>
                   </div>
-                  
-                  <button 
+
+                  <button
                     onClick={(e) => handleDeleteProject(e, proj.id)}
                     className="absolute top-4 right-4 text-slate-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 p-1"
                     title="Eliminar proyecto"

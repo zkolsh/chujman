@@ -1,4 +1,8 @@
-import {Router} from 'express';
+/**
+ * @fileoverview Enrutador principal que agrupa todas las rutas de la API
+ */
+
+import { Router } from 'express';
 import v1Routes from './v1/index.js';
 
 const router = Router();

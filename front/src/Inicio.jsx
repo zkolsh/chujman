@@ -1,9 +1,22 @@
+/**
+ * @fileoverview Pantalla de inicio de la aplicación (Landing page)
+ */
+
 import React from 'react';
+
+/**
+ * Componente que renderiza la pantalla principal o de bienvenida.
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {() => void} props.onGoToLogin - Función para navegar a la pantalla de login
+ * @param {() => void} props.onGoToRegister - Función para navegar a la pantalla de registro
+ * @returns {JSX.Element}
+ */
 
 const Inicio = ({ onGoToLogin, onGoToRegister }) => {
     return (
         <div className="min-h-screen font-sans relative flex flex-col overflow-hidden">
-            <div 
+            <div
                 className="absolute inset-0 bg-center bg-no-repeat scale-[1.3]"
                 style={{ backgroundImage: "url('/fondoInicio.png')", backgroundSize: 'cover' }}
             ></div>

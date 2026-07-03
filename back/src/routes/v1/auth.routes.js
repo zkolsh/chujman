@@ -1,6 +1,10 @@
-import {Router} from 'express';
-import {authController} from '../../controllers/auth.controller.js';
-import {authMiddleware} from '../../middlewares/auth.js';
+/**
+ * @fileoverview Definición de las rutas relacionadas con la autenticación (registro, login, validación)
+ */
+
+import { Router } from 'express';
+import { authController } from '../../controllers/auth.controller.js';
+import { authMiddleware } from '../../middlewares/auth.js';
 
 const router = Router();
 

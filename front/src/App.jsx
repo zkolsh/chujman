@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Componente principal de la aplicación, maneja las rutas y el estado de autenticación.
+ */
+
 import React, { useState, useEffect } from 'react';
 import Inicio from './Inicio';
 import Login from './Login';
@@ -7,12 +11,19 @@ import PanelProyectos from './PanelProyectos';
 import TableroProyecto from './TableroProyecto';
 import ConfirmModal from './ConfirmModal';
 
+/**
+ * Componente raíz de la aplicación.
+ * Controla el flujo entre inicio de sesión, registro, panel de proyectos y la vista del proyecto.
+ * 
+ * @returns {JSX.Element}
+ */
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [authView, setAuthView] = useState('inicio');
   const [activeProject, setActiveProject] = useState(null);
   const [showEasterEgg, setShowEasterEgg] = useState(false);
-  
+
   // ConfirmModal state for Logout
   const [confirmConfig, setConfirmConfig] = useState({ isOpen: false, message: '', onConfirm: null });
 
@@ -24,19 +35,19 @@ function App() {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${token}` }
       })
-      .then(res => res.json())
-      .then(data => {
-        if (data.success && data.user) {
-          localStorage.setItem('userName', data.user.name || '');
+        .then(res => res.json())
+        .then(data => {
+          if (data.success && data.user) {
+            localStorage.setItem('userName', data.user.name || '');
+            setIsLoggedIn(true);
+          } else {
+            executeLogout(); // Token inválido
+          }
+        })
+        .catch(() => {
+          // Si hay error de red, asumimos que está logueado temporalmente si hay token
           setIsLoggedIn(true);
-        } else {
-          executeLogout(); // Token inválido
-        }
-      })
-      .catch(() => {
-        // Si hay error de red, asumimos que está logueado temporalmente si hay token
-        setIsLoggedIn(true); 
-      });
+        });
     }
   }, []);
 
@@ -84,17 +95,17 @@ function App() {
       <div>
         {isLoggedIn ? (
           activeProject ? (
-            <TableroProyecto 
-              project={activeProject} 
+            <TableroProyecto
+              project={activeProject}
               onSelectProject={handleSelectProject}
               onBackToDashboard={handleLeaveProject}
               onLogout={handleLogout}
               onEasterEgg={() => setShowEasterEgg(true)}
             />
           ) : (
-            <PanelProyectos 
-              onSelectProject={handleSelectProject} 
-              onLogout={handleLogout} 
+            <PanelProyectos
+              onSelectProject={handleSelectProject}
+              onLogout={handleLogout}
             />
           )
         ) : (

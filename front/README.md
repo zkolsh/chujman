@@ -11,21 +11,26 @@ ejecutar los siguientes comandos en la carpeta front:
 
 ```
 npm install vite
-npm run dev
-```
-# React + Vite
+# Estructura del Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este documento explica la organización básica de la carpeta `front/src` de la aplicación React.
 
-Currently, two official plugins are available:
+## Archivos Principales
+- **`main.jsx`**: Arranca la aplicación y configura React.
+- **`App.jsx`**: Es el componente principal. Maneja las rutas (Login, Register, Dashboard) y sabe si el usuario inició sesión.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Pantallas (Vistas)
+- **`Inicio.jsx`**: Pantalla de bienvenida.
+- **`Login.jsx`**: Formulario para iniciar sesión.
+- **`Register.jsx`**: Formulario para crear una cuenta.
+- **`PanelProyectos.jsx`**: Muestra la lista de proyectos del usuario. Permite crear o borrarlos.
+- **`Receta.jsx`**: Pantalla extra (Easter Egg) con una receta.
 
-## React Compiler
+## Componentes del Grafo de Tareas
+Estos archivos hacen funcionar el mapa visual de tareas:
+- **`TableroProyecto.jsx`**: Vista principal al abrir un proyecto. Carga las tareas y se comunica con el servidor.
+- **`GraphWorkspace.jsx`**: Envuelve y dibuja el lienzo interactivo donde se ven las tareas.
+- **`TaskNode.jsx`**: Es el diseño visual de cada "cajita" (tarea) en el mapa. Permite cambiar el estado de la tarea rápidamente con un menú.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+## Componentes Reutilizables
+- **`ConfirmModal.jsx`**: Una ventanita flotante para pedir confirmación antes de borrar algo.

@@ -1,4 +1,32 @@
+/**
+ * @fileoverview Componente modal de confirmación reutilizable
+ */
 import React from 'react';
+
+/**
+ * Componente modal para confirmar acciones destructivas o importantes.
+ * 
+ * @param {Object} props - Las propiedades del componente
+ * @param {boolean} props.isOpen - Define si el modal está visible
+ * @param {string} [props.title] - Título del modal
+ * @param {string} props.message - Mensaje descriptivo a mostrar
+ * @param {string} [props.confirmText] - Texto del botón de confirmación
+ * @param {string} [props.cancelText] - Texto del botón de cancelación
+ * @param {() => void} props.onConfirm - Función que se ejecuta al confirmar
+ * @param {() => void} props.onCancel - Función que se ejecuta al cancelar
+ * @param {boolean} [props.isDanger] - Indica si la acción es peligrosa (estilos en rojo)
+ * @returns {JSX.Element|null}
+ * 
+ * @example
+ * <ConfirmModal
+ *   isOpen={true}
+ *   title="Eliminar Cuenta"
+ *   message="¿Estás seguro de que quieres eliminar tu cuenta permanentemente?"
+ *   isDanger={true}
+ *   onConfirm={() => console.log('Confirmado')}
+ *   onCancel={() => console.log('Cancelado')}
+ * />
+ */
 
 function ConfirmModal({ isOpen, title, message, confirmText, cancelText, onConfirm, onCancel, isDanger }) {
   if (!isOpen) return null;
@@ -13,13 +41,13 @@ function ConfirmModal({ isOpen, title, message, confirmText, cancelText, onConfi
           <p className="text-sm text-slate-600 leading-relaxed">{message}</p>
         </div>
         <div className="px-6 py-4 flex justify-end space-x-3 bg-slate-50/50 border-t border-slate-50">
-          <button 
+          <button
             onClick={onCancel}
             className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200"
           >
             {cancelText || 'Cancelar'}
           </button>
-          <button 
+          <button
             onClick={onConfirm}
             className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 ${isDanger ? 'bg-red-600 hover:bg-red-700 focus:ring-red-600' : 'bg-slate-900 hover:bg-slate-800 focus:ring-slate-900'}`}
           >

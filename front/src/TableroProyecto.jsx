@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Tablero interactivo (Grafo) para gestionar tareas y subtareas de un proyecto
+ */
+
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ReactFlow, MiniMap, Controls, Background, useNodesState, useEdgesState, addEdge, Handle, Position } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -23,9 +27,9 @@ function TaskNode({ id, data }) {
   return (
     <div className={`p-4 rounded-xl border-2 shadow-sm min-w-[220px] transition-all ${statusColors[data.estado] || statusColors["No Iniciado"]}`}>
       <Handle type="target" position={Position.Top} className="w-3 h-3 bg-blue-500 border-2 border-white" />
-      
+
       <div className="flex flex-col space-y-3 relative">
-        <button 
+        <button
           onClick={() => data.onDelete(id)}
           className="absolute -top-2 -right-2 text-slate-400 hover:text-red-500 transition-colors bg-white rounded-full p-1 shadow-sm"
           title="Eliminar tarea"
@@ -45,7 +49,7 @@ function TaskNode({ id, data }) {
             className="w-full text-sm font-semibold text-slate-800 bg-white border-b-2 border-blue-500 outline-none px-1 py-0.5 rounded-t"
           />
         ) : (
-          <div 
+          <div
             onDoubleClick={() => setIsEditing(true)}
             className={`text-sm font-semibold px-1 py-0.5 cursor-text ${data.estado === 'Completado' ? 'line-through text-slate-500' : 'text-slate-800'}`}
             title="Doble clic para editar"
@@ -72,12 +76,25 @@ function TaskNode({ id, data }) {
 
 const nodeTypes = { taskNode: TaskNode };
 
+/**
+ * Componente principal del espacio de trabajo. Renderiza el diagrama interactivo de nodos.
+ * Maneja la lógica de "Estados Inteligentes" propagando los estados de las tareas hacia arriba (Ancestros) y hacia abajo (Descendientes en cascada).
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {Object} props.project - Objeto con los datos del proyecto actual
+ * @param {(project: Object) => void} props.onSelectProject - Función para cambiar de proyecto desde el sidebar
+ * @param {() => void} props.onBackToDashboard - Función para volver al menú principal de proyectos
+ * @param {() => void} props.onLogout - Función para cerrar la sesión actual
+ * @param {() => void} props.onEasterEgg - Función secreta
+ * @returns {JSX.Element}
+ */
+
 export default function TableroProyecto({ project, onSelectProject, onBackToDashboard, onLogout, onEasterEgg }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [projectsList, setProjectsList] = useState([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  
+
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
@@ -149,13 +166,13 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
       const data = await res.json();
       if (res.ok && data.success) {
         const { nodes: dbNodes, edges: dbEdges } = data.data;
-        
+
         const mappedNodes = dbNodes.map((n, i) => ({
           id: String(n.id),
           type: 'taskNode',
           position: { x: 250 + (i * 20), y: 100 + (i * 20) }, // Recommend adding x, y to Archivo table later!
-          data: { 
-            texto: n.texto, 
+          data: {
+            texto: n.texto,
             estado: n.estado,
             onUpdate: handleUpdateNode,
             onDelete: handleDeleteNode
@@ -192,8 +209,8 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
           id: String(newNode.id),
           type: 'taskNode',
           position: { x: window.innerWidth / 2 - 100, y: window.innerHeight / 2 - 100 },
-          data: { 
-            texto: newNode.texto, 
+          data: {
+            texto: newNode.texto,
             estado: newNode.estado,
             onUpdate: handleUpdateNode,
             onDelete: handleDeleteNode
@@ -203,21 +220,183 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
     } catch (err) { console.error(err); }
   };
 
-  const handleUpdateNode = async (nodeId, updates) => {
-    setNodes(nds => nds.map(node => {
-      if (node.id === nodeId) {
-        return { ...node, data: { ...node.data, ...updates } };
+  const nodesRef = React.useRef([]);
+  const edgesRef = React.useRef([]);
+  useEffect(() => { nodesRef.current = nodes; }, [nodes]);
+  useEffect(() => { edgesRef.current = edges; }, [edges]);
+
+  // Funciones de utilidad para Inteligencia del Grafo
+
+  /**
+   * Obtiene todos los nodos descendientes (subtareas, nietos, etc.) de manera recursiva
+   * @param {string} nodeId - ID del nodo padre
+   * @param {Array} allEdges - Lista de todas las aristas (conexiones) actuales
+   * @param {Set} result - Set acumulador para recursión
+   * @returns {Array<string>} Array con los IDs de todos los descendientes
+   */
+
+  const getDescendants = (nodeId, allEdges, result = new Set()) => {
+    allEdges.forEach(e => {
+      if (e.source === nodeId && !result.has(e.target)) {
+        result.add(e.target);
+        getDescendants(e.target, allEdges, result);
       }
+    });
+    return Array.from(result);
+  };
+
+  /**
+   * Obtiene todos los nodos ancestros (padres, abuelos, etc.) de manera recursiva
+   * @param {string} nodeId - ID del nodo hijo
+   * @param {Array} allEdges - Lista de todas las aristas (conexiones) actuales
+   * @param {Set} result - Set acumulador para recursión
+   * @returns {Array<string>} Array con los IDs de todos los ancestros
+   */
+
+  const getAncestors = (nodeId, allEdges, result = new Set()) => {
+    allEdges.forEach(e => {
+      if (e.target === nodeId && !result.has(e.source)) {
+        result.add(e.source);
+        getAncestors(e.source, allEdges, result);
+      }
+    });
+    return Array.from(result);
+  };
+
+  /**
+   * Aplica los cambios de estado aplicando reglas de inteligencia (propagación hacia ancestros o descendientes).
+   * Actualiza el estado local de React inmediatamente y luego sincroniza en paralelo con el Backend.
+   * 
+   * @param {string} nodeId - ID de la tarea principal modificada
+   * @param {Object} updates - Objeto con los campos a actualizar (ej: { estado: 'Completado' })
+   * @param {Array<string>} descendantsToUpdate - Lista de IDs de subtareas que deben heredar el cambio (propagación en cascada)
+   */
+
+  const applyStatusChanges = async (nodeId, updates, descendantsToUpdate = []) => {
+    let nodesToUpdateMap = new Map();
+    nodesToUpdateMap.set(nodeId, updates);
+
+    // 1. Añadir descendientes a actualizar (ya sea a No Iniciado o Completado)
+    descendantsToUpdate.forEach(descId => {
+      nodesToUpdateMap.set(descId, { estado: updates.estado });
+    });
+
+    // 2. Propagación Inteligente hacia los Ancestros
+    const ancestors = getAncestors(nodeId, edgesRef.current);
+    ancestors.forEach(ancId => {
+      const ancNode = nodesRef.current.find(n => n.id === ancId);
+      if (!ancNode) return;
+
+      const currentAncState = nodesToUpdateMap.has(ancId) ? nodesToUpdateMap.get(ancId).estado : ancNode.data.estado;
+
+      if (updates.estado === 'No Iniciado') {
+        // Si una subtarea vuelve a No Iniciado, el padre ya no puede estar Completado
+        if (currentAncState === 'Completado') {
+          nodesToUpdateMap.set(ancId, { estado: 'En Progreso' });
+        }
+      } else if (updates.estado === 'En Progreso') {
+        // Si una subtarea arranca, el padre debe estar En Progreso (arrastramos a padres No Iniciados o reabrimos Completados)
+        if (currentAncState !== 'En Progreso') {
+          nodesToUpdateMap.set(ancId, { estado: 'En Progreso' });
+        }
+      } else if (updates.estado === 'Completado') {
+        // Si la subtarea se completa, el padre pasa a En Progreso SOLO si estaba No Iniciado
+        // (Si el padre ya estaba Completado o En Progreso, se mantiene igual)
+        if (currentAncState === 'No Iniciado') {
+          nodesToUpdateMap.set(ancId, { estado: 'En Progreso' });
+        }
+      }
+    });
+
+    const nodesToUpdate = Array.from(nodesToUpdateMap, ([id, val]) => ({ id, updates: val }));
+
+    // Actualizar UI Local Inmediatamente (Optimistic UI)
+    setNodes(nds => nds.map(node => {
+      const updateReq = nodesToUpdateMap.get(node.id);
+      if (updateReq) return { ...node, data: { ...node.data, ...updateReq } };
       return node;
     }));
 
+    // Enviar al servidor de forma concurrente
     try {
-      await fetch(`${import.meta.env.VITE_API_URL}/projects/${project.id}/tasks/${nodeId}`, {
-        method: 'PUT',
-        headers: authHeaders,
-        body: JSON.stringify(updates)
+      await Promise.all(nodesToUpdate.map(async (updateReq) => {
+        await fetch(`${import.meta.env.VITE_API_URL}/projects/${project.id}/tasks/${updateReq.id}`, {
+          method: 'PUT',
+          headers: authHeaders,
+          body: JSON.stringify(updateReq.updates)
+        });
+      }));
+    } catch (err) { console.error('Error propagando estados:', err); }
+  };
+
+  const handleUpdateNode = async (nodeId, updates) => {
+    // Si cambia texto, no hay lógica cruzada
+    if (!updates.estado) {
+      setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, ...updates } } : n));
+      try {
+        await fetch(`${import.meta.env.VITE_API_URL}/projects/${project.id}/tasks/${nodeId}`, {
+          method: 'PUT',
+          headers: authHeaders,
+          body: JSON.stringify(updates)
+        });
+      } catch (err) { console.error(err); }
+      return;
+    }
+
+    const descendants = getDescendants(nodeId, edgesRef.current);
+
+    // Regla: Completado inteligente y silencioso
+    if (updates.estado === 'Completado') {
+      const uncompletedDescendants = descendants.filter(dId => {
+        const dNode = nodesRef.current.find(n => n.id === dId);
+        return dNode && dNode.data.estado !== 'Completado';
       });
-    } catch (err) { console.error(err); }
+
+      if (uncompletedDescendants.length > 0) {
+        setConfirmConfig({
+          isOpen: true,
+          title: 'Completar Tarea en Cascada',
+          message: '¿Estás seguro que quieres marcar la tarea como completada? Todas sus subtareas pendientes también se marcarán como completadas.',
+          isDanger: false,
+          onConfirm: async () => {
+            setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+            await applyStatusChanges(nodeId, updates, uncompletedDescendants);
+          }
+        });
+        return; // Esperamos confirmación
+      }
+      // Silencioso
+      await applyStatusChanges(nodeId, updates, []);
+      return;
+    }
+
+    // Regla: Reinicio total (No Iniciado)
+    if (updates.estado === 'No Iniciado') {
+      const startedDescendants = descendants.filter(dId => {
+        const dNode = nodesRef.current.find(n => n.id === dId);
+        return dNode && dNode.data.estado !== 'No Iniciado';
+      });
+
+      if (startedDescendants.length > 0) {
+        setConfirmConfig({
+          isOpen: true,
+          title: 'Reinicio Total de la Tarea',
+          message: 'Al pasar a "No Iniciado", todas sus subtareas también volverán a "No Iniciado". ¿Estás de acuerdo?',
+          isDanger: true,
+          onConfirm: async () => {
+            setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+            await applyStatusChanges(nodeId, updates, startedDescendants);
+          }
+        });
+        return; // Esperamos confirmación
+      }
+
+      await applyStatusChanges(nodeId, updates, []);
+      return;
+    }
+
+    // Si cambia a "En Progreso", no hay modal hacia abajo, pero arrastra al padre hacia arriba
+    await applyStatusChanges(nodeId, updates, []);
   };
 
   const handleDeleteNode = (nodeId) => {
@@ -227,10 +406,10 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
       message: '¿Estás seguro de eliminar esta tarea? Se eliminarán también sus conexiones.',
       isDanger: true,
       onConfirm: async () => {
-        setConfirmConfig({ ...confirmConfig, isOpen: false });
+        setConfirmConfig(prev => ({ ...prev, isOpen: false }));
         setNodes(nds => nds.filter(n => n.id !== nodeId));
         setEdges(eds => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
-        
+
         try {
           await fetch(`${import.meta.env.VITE_API_URL}/projects/${project.id}/tasks/${nodeId}`, {
             method: 'DELETE',
@@ -243,7 +422,7 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
 
   const onConnect = useCallback(async (params) => {
     if (params.source === params.target) return;
-    
+
     const newEdgeId = `e${params.source}-${params.target}`;
     const visualEdge = { ...params, id: newEdgeId, animated: true, style: { stroke: '#3b82f6', strokeWidth: 2 } };
     setEdges(eds => addEdge(visualEdge, eds));
@@ -254,6 +433,12 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
         headers: authHeaders,
         body: JSON.stringify({ fromId: parseInt(params.source), toId: parseInt(params.target) })
       });
+
+      // Regla: Trabajo nuevo reabre tareas
+      const parentNode = nodesRef.current.find(n => n.id === params.source);
+      if (parentNode && parentNode.data.estado === 'Completado') {
+        await applyStatusChanges(params.source, { estado: 'En Progreso' });
+      }
     } catch (err) { console.error(err); }
   }, [project.id]);
 
@@ -328,7 +513,7 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
             </div>
           </div>
 
-          <button 
+          <button
             onClick={handleCreateNode}
             className="pointer-events-auto flex items-center gap-2 px-4 py-2 bg-slate-900 text-white text-sm font-medium rounded-lg shadow-md hover:bg-slate-800 transition-colors"
           >
@@ -356,14 +541,14 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
               maxZoom={2}
             >
               <Controls className="bg-white border-slate-200 shadow-md" />
-              <MiniMap 
+              <MiniMap
                 nodeColor={(node) => {
                   if (node.data?.estado === 'Completado') return '#22c55e';
                   if (node.data?.estado === 'En Progreso') return '#a855f7';
                   return '#cbd5e1';
                 }}
                 maskColor="rgba(248, 250, 252, 0.7)"
-                className="bg-white border-slate-200 shadow-md rounded-lg" 
+                className="bg-white border-slate-200 shadow-md rounded-lg"
               />
               <Background color="#cbd5e1" gap={16} size={2} />
             </ReactFlow>
@@ -381,10 +566,10 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
         onConfirm={confirmConfig.onConfirm}
         onCancel={() => setConfirmConfig({ ...confirmConfig, isOpen: false })}
       />
-      
+
       {isCreateProjectModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+          <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
               <h2 className="text-lg font-semibold text-slate-800">Nuevo Proyecto</h2>
               <button onClick={() => setIsCreateProjectModalOpen(false)} className="text-slate-400 hover:text-slate-600">
@@ -394,9 +579,9 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
             <form onSubmit={handleSubmitNewProject} className="p-6 space-y-4">
               <div>
                 <label className="block text-sm font-medium text-slate-700 mb-1">Nombre <span className="text-red-500">*</span></label>
-                <input 
-                  type="text" 
-                  value={newProjectName} 
+                <input
+                  type="text"
+                  value={newProjectName}
                   onChange={(e) => { setNewProjectName(e.target.value); if (e.target.value.trim()) setProjectNameError(false); }}
                   className="w-full h-10 px-3 rounded-md border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm" autoFocus
                 />

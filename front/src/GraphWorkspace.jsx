@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Área de trabajo principal para visualizar e interactuar con el grafo de tareas
+ */
+
 import React, { useCallback, useMemo } from 'react';
 import { ReactFlow, MiniMap, Controls, Background, useNodesState, useEdgesState, addEdge } from '@xyflow/react';
 import TaskNode from './TaskNode';
@@ -6,15 +10,26 @@ import '@xyflow/react/dist/style.css';
 
 const nodeTypes = { taskNode: TaskNode };
 
+/**
+ * Componente que renderiza el grafo interactivo usando React Flow.
+ * Maneja los nodos (tareas) y las aristas (relaciones).
+ * 
+ * @param {Object} props - Propiedades del componente
+ * @param {Array} props.initialArchivos - Lista inicial de nodos/archivos a renderizar
+ * @param {Array} props.initialRelaciones - Lista inicial de relaciones/aristas entre nodos
+ * @param {(data: Object) => void} props.onSyncWithDatabase - Función para guardar la topología actual
+ * @returns {JSX.Element}
+ */
+
 export default function GraphWorkspace({ initialArchivos, initialRelaciones, onSyncWithDatabase }) {
   const mappedNodes = useMemo(() => {
     return initialArchivos.map((archivo) => ({
       id: String(archivo.id),
       type: 'taskNode',
-      position: { x: Math.random() * 400, y: Math.random() * 400 }, 
-      data: { 
+      position: { x: Math.random() * 400, y: Math.random() * 400 },
+      data: {
         id: archivo.id,
-        label: archivo.texto || `Node #${archivo.id}`, 
+        label: archivo.texto || `Node #${archivo.id}`,
         estado: archivo.estado,
         onStatusChange: (id, newEstado) => handleStatusUpdate(id, newEstado)
       }
@@ -70,7 +85,7 @@ export default function GraphWorkspace({ initialArchivos, initialRelaciones, onS
           Guardar Topologia
         </button>
       </header>
-      
+
       <div className="flex-1 w-full h-full">
         <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} onEdgesDelete={onEdgesDelete} nodeTypes={nodeTypes} fitView >
           <Controls className="bg-slate-900 border border-slate-700 text-slate-200 fill-slate-200" />

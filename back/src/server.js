@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Punto de entrada de la aplicación, encargado de arrancar el servidor y conectar a la base de datos
+ */
+
 import app from './app.js';
 import prisma from './config/database.js';
 const PORT = process.env.PORT || 55500;

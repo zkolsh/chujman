@@ -1,7 +1,27 @@
-Changeset:
- 1. Reemplazamos ventanas que aparecien arriba de la pantalla para confirmar por ventanas en el medio de la pantalla
+Changeset 31/5:
+1. Tablas de archivos y conexión entre archivos
+2. Mejorado front con shadcn  
+3. Ahora puedes crear proyectos, tareas y subtareas
+
+Changeset 14/6:
+ 1. Reemplazamos ventanas que aparecían arriba de la pantalla para confirmar por ventanas en el medio de la pantalla
  2. Estados de Tareas y subtareas (No iniciado, En Progreso, Completado.)
  3. Mejoras de panel de la izquierda en las Tareas
- 4. Solucionada Organizacion del backend
- 5. Ahora en los formularios (register, crear proyecto, login) te marca en rojo que es lo que no llenaste y deberias.
+ 4. Solucionada Organización del backend
+ 5. Ahora en los formularios (register, crear proyecto, login) te marca en rojo qué es lo que no llenaste y deberías.
  6. Renderizar la página con grafos
+
+Changeset 5/7:
+1. Readme general sobre el proyecto, y en Readmes de front y back ahora se explica qué hace cada archivo.
+2. Documentación de componentes tanto en back como en front.
+3. Ahora los estados son inteligentes es decir:
+
+a- Completas una tarea y las subtareas se completan (sale cartel avisándote que esto va a ocurrir)
+
+b- Al marcar una tarea como no iniciada, todas las subtareas se marcarán como no iniciadas (sale cartel avisándote que esto va a ocurrir)
+
+c- Si marcas una subtarea como en progreso o completada, si la tarea padre estaba no iniciada pasará automáticamente a en progreso.
+
+d- Si conectas una nueva subtarea a una tarea completada, el padre pasará automáticamente a en progreso.
+
+4. Validación estricta del formato de correo electrónico en el formulario de registro.

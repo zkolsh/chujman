@@ -1,3 +1,7 @@
+/**
+ * @fileoverview Definición de las rutas REST para la gestión de tareas (nodos) y relaciones (aristas)
+ */
+
 import { Router } from 'express';
 import { getProjectTasks, createProjectTask, deleteTask, updateTask, createRelation, deleteRelation } from '../../controllers/task.controller.js';
 import { authMiddleware } from '../../middlewares/auth.js';
