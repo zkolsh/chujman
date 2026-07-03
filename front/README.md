@@ -11,6 +11,8 @@ ejecutar los siguientes comandos en la carpeta front:
 
 ```
 npm install vite
+```
+
 # Estructura del Frontend
 
 Este documento explica la organización básica de la carpeta `front/src` de la aplicación React.
