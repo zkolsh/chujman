@@ -98,9 +98,9 @@ export const deleteTask = async (req, res, next) => {
 export const updateTask = async (req, res, next) => {
   try {
     const { taskId } = req.params;
-    const { texto, estado } = req.body;
+    const { texto, estado, x, y } = req.body;
 
-    const result = await taskService.updateTask(parseInt(taskId), { texto, estado });
+    const result = await taskService.updateTask(parseInt(taskId), { texto, estado, x, y });
 
     res.status(200).json({ success: true, data: result });
   } catch (error) {

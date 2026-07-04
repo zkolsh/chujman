@@ -68,6 +68,8 @@ export const taskService = {
     const updateData = {};
     if (data.texto !== undefined) updateData.texto = data.texto;
     if (data.estado !== undefined) updateData.estado = data.estado;
+    if (data.x !== undefined) updateData.x = data.x;
+    if (data.y !== undefined) updateData.y = data.y;
 
     return await taskRepository.updateNode(id, updateData);
   },

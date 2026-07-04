@@ -25,3 +25,10 @@ c- Si marcas una subtarea como en progreso o completada, si la tarea padre estab
 d- Si conectas una nueva subtarea a una tarea completada, el padre pasará automáticamente a en progreso.
 
 4. Validación estricta del formato de correo electrónico en el formulario de registro.
+
+Changeset 4/7:
+1. Campos x e y en la tabla Archivo para guardar la posición de cada tarea en la grilla.
+2. Corregida la sintaxis del schema de Prisma (int x → x Int).
+3. El backend ahora acepta y persiste las coordenadas x e y al actualizar una tarea.
+4. Al cargar el tablero, las tareas se posicionan según sus coordenadas guardadas en la base de datos.
+5. Al mover (arrastrar) una tarea en el grafo, su nueva posición se guarda automáticamente en la base de datos.

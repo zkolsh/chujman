@@ -38,7 +38,9 @@ model Archivo {
   estado String @default("No Iniciado")
   from  ArchivoRelacion[] @relation("from")
   to    ArchivoRelacion[] @relation("to")
-}
+  x     Int    @default(0)
+  y     Int    @default(0)
+  }
 
 model ArchivoRelacion {
   id    Int @id @default(autoincrement())

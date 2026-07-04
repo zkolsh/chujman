@@ -170,7 +170,7 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
         const mappedNodes = dbNodes.map((n, i) => ({
           id: String(n.id),
           type: 'taskNode',
-          position: { x: 250 + (i * 20), y: 100 + (i * 20) }, // Recommend adding x, y to Archivo table later!
+          position: { x: n.x ?? (250 + (i * 20)), y: n.y ?? (100 + (i * 20)) },
           data: {
             texto: n.texto,
             estado: n.estado,
@@ -208,7 +208,7 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
         setNodes(nds => [...nds, {
           id: String(newNode.id),
           type: 'taskNode',
-          position: { x: window.innerWidth / 2 - 100, y: window.innerHeight / 2 - 100 },
+          position: { x: newNode.x ?? (window.innerWidth / 2 - 100), y: newNode.y ?? (window.innerHeight / 2 - 100) },
           data: {
             texto: newNode.texto,
             estado: newNode.estado,
@@ -442,6 +442,17 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
     } catch (err) { console.error(err); }
   }, [project.id]);
 
+  const onNodeDragStop = useCallback(async (_event, node) => {
+    const { x, y } = node.position;
+    try {
+      await fetch(`${import.meta.env.VITE_API_URL}/projects/${project.id}/tasks/${node.id}`, {
+        method: 'PUT',
+        headers: authHeaders,
+        body: JSON.stringify({ x: Math.round(x), y: Math.round(y) })
+      });
+    } catch (err) { console.error(err); }
+  }, [project.id]);
+
   const onEdgesDelete = useCallback(async (edgesToDelete) => {
     edgesToDelete.forEach(async (edge) => {
       try {
@@ -535,6 +546,7 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
               onEdgesChange={onEdgesChange}
               onConnect={onConnect}
               onEdgesDelete={onEdgesDelete}
+              onNodeDragStop={onNodeDragStop}
               nodeTypes={nodeTypes}
               fitView
               minZoom={0.2}
