@@ -40,7 +40,8 @@ model Archivo {
   to    ArchivoRelacion[] @relation("to")
   x     Int    @default(0)
   y     Int    @default(0)
-  }
+  deadline  DateTime?
+ }
 
 model ArchivoRelacion {
   id    Int @id @default(autoincrement())

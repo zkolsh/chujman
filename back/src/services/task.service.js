@@ -71,7 +71,76 @@ export const taskService = {
     if (data.x !== undefined) updateData.x = data.x;
     if (data.y !== undefined) updateData.y = data.y;
 
+    // Handle Deadline Update and Cascade
+    if (data.deadline !== undefined) {
+      const currentNode = await taskRepository.findNodeById(id);
+      if (!currentNode) throw new Error('Tarea no encontrada');
+
+      updateData.deadline = data.deadline ? new Date(data.deadline) : null;
+
+      // Only cascade if there was an original deadline and the new one shifts forward (postponed)
+      if (currentNode.deadline && updateData.deadline) {
+        const oldTime = new Date(currentNode.deadline).getTime();
+        const newTime = updateData.deadline.getTime();
+        const deltaMs = newTime - oldTime;
+
+        if (deltaMs > 0) {
+          // Perform the cascade asynchronously behind the scenes or await it depending on performance goals
+          await this._cascadeDeadlineShift(currentNode.idProject, id, deltaMs);
+        }
+      }
+    }
+
     return await taskRepository.updateNode(id, updateData);
+  },
+
+  /**
+   * Helper privado para propagar el desplazamiento de fechas protegiéndose de ciclos
+   */
+  async _cascadeDeadlineShift(idProject, rootNodeId, deltaMs) {
+    // 1. Fetch graph environment
+    const { nodes, edges } = await this.getProjectTasks(idProject);
+    
+    // 2. Build Adjacency List Map (fromId -> arrays of toId)
+    const adjacencyList = {};
+    const nodeMap = {};
+    
+    nodes.forEach(node => {
+      nodeMap[node.id] = node;
+      adjacencyList[node.id] = [];
+    });
+    
+    edges.forEach(edge => {
+      if (adjacencyList[edge.fromId]) {
+        adjacencyList[edge.fromId].push(edge.toId);
+      }
+    });
+
+    // 3. Queue-based Traversal (BFS) avoiding cycles
+    const queue = [...(adjacencyList[rootNodeId] || [])];
+    const visited = new Set(queue); // Initialize visited with immediate children
+
+    while (queue.length > 0) {
+      const currentId = queue.shift();
+      const node = nodeMap[currentId];
+
+      if (node && node.deadline) {
+        const currentDeadline = new Date(node.deadline);
+        const newDeadline = new Date(currentDeadline.getTime() + deltaMs);
+
+        // Update database for this child node
+        await taskRepository.updateNode(node.id, { deadline: newDeadline });
+
+        // Add unvisited children to queue
+        const children = adjacencyList[node.id] || [];
+        for (const childId of children) {
+          if (!visited.has(childId)) {
+            visited.add(childId);
+            queue.push(childId);
+          }
+        }
+      }
+    }
   },
 
   /**

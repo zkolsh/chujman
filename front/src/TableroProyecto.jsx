@@ -6,73 +6,7 @@ import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { ReactFlow, MiniMap, Controls, Background, useNodesState, useEdgesState, addEdge, Handle, Position } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import ConfirmModal from './ConfirmModal';
-
-function TaskNode({ id, data }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [textVal, setTextVal] = useState(data.texto || '');
-
-  const handleBlur = () => {
-    setIsEditing(false);
-    if (textVal !== data.texto) {
-      data.onUpdate(id, { texto: textVal });
-    }
-  };
-
-  const statusColors = {
-    "No Iniciado": "bg-slate-50 border-slate-300",
-    "En Progreso": "bg-purple-50 border-purple-400",
-    "Completado": "bg-green-50 border-green-400 opacity-75"
-  };
-
-  return (
-    <div className={`p-4 rounded-xl border-2 shadow-sm min-w-[220px] transition-all ${statusColors[data.estado] || statusColors["No Iniciado"]}`}>
-      <Handle type="target" position={Position.Top} className="w-3 h-3 bg-blue-500 border-2 border-white" />
-
-      <div className="flex flex-col space-y-3 relative">
-        <button
-          onClick={() => data.onDelete(id)}
-          className="absolute -top-2 -right-2 text-slate-400 hover:text-red-500 transition-colors bg-white rounded-full p-1 shadow-sm"
-          title="Eliminar tarea"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3 h-3">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-
-        {isEditing ? (
-          <input
-            autoFocus
-            value={textVal}
-            onChange={(e) => setTextVal(e.target.value)}
-            onBlur={handleBlur}
-            onKeyDown={(e) => e.key === 'Enter' && handleBlur()}
-            className="w-full text-sm font-semibold text-slate-800 bg-white border-b-2 border-blue-500 outline-none px-1 py-0.5 rounded-t"
-          />
-        ) : (
-          <div
-            onDoubleClick={() => setIsEditing(true)}
-            className={`text-sm font-semibold px-1 py-0.5 cursor-text ${data.estado === 'Completado' ? 'line-through text-slate-500' : 'text-slate-800'}`}
-            title="Doble clic para editar"
-          >
-            {data.texto || 'Sin título'}
-          </div>
-        )}
-
-        <select
-          value={data.estado}
-          onChange={(e) => data.onUpdate(id, { estado: e.target.value })}
-          className="w-full text-xs font-medium bg-white border border-slate-200 rounded p-1.5 text-slate-700 outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="No Iniciado">No Iniciado</option>
-          <option value="En Progreso">En Progreso</option>
-          <option value="Completado">Completado</option>
-        </select>
-      </div>
-
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3 bg-blue-500 border-2 border-white" />
-    </div>
-  );
-}
+import TaskNode from './TaskNode';
 
 const nodeTypes = { taskNode: TaskNode };
 
@@ -174,6 +108,7 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
           data: {
             texto: n.texto,
             estado: n.estado,
+            deadline: n.deadline,
             onUpdate: handleUpdateNode,
             onDelete: handleDeleteNode
           }
@@ -330,8 +265,7 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
   };
 
   const handleUpdateNode = async (nodeId, updates) => {
-    // Si cambia texto, no hay lógica cruzada
-    if (!updates.estado) {
+    if (!updates.estado && updates.deadline === undefined) {
       setNodes(nds => nds.map(n => n.id === nodeId ? { ...n, data: { ...n.data, ...updates } } : n));
       try {
         await fetch(`${import.meta.env.VITE_API_URL}/projects/${project.id}/tasks/${nodeId}`, {
@@ -340,6 +274,29 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
           body: JSON.stringify(updates)
         });
       } catch (err) { console.error(err); }
+      return;
+    }
+
+    if (updates.deadline !== undefined) {
+      setNodes(nds => nds.map(n =>
+        n.id === nodeId
+          ? { ...n, data: { ...n.data, deadline: updates.deadline } }
+          : n
+      ));
+
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/projects/${project.id}/tasks/${nodeId}`, {
+          method: 'PUT',
+          headers: authHeaders,
+          body: JSON.stringify({ deadline: updates.deadline })
+        });
+
+        if (res.ok) {
+          await fetchGraphData();
+        }
+      } catch (err) {
+        console.error('Error procesando fecha límite:', err);
+      }
       return;
     }
 

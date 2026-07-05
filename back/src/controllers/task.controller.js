@@ -98,9 +98,16 @@ export const deleteTask = async (req, res, next) => {
 export const updateTask = async (req, res, next) => {
   try {
     const { taskId } = req.params;
-    const { texto, estado, x, y } = req.body;
+    // Extract deadline from req.body
+    const { texto, estado, x, y, deadline } = req.body; 
 
-    const result = await taskService.updateTask(parseInt(taskId), { texto, estado, x, y });
+    const result = await taskService.updateTask(parseInt(taskId), { 
+      texto, 
+      estado, 
+      x, 
+      y, 
+      deadline 
+    });
 
     res.status(200).json({ success: true, data: result });
   } catch (error) {

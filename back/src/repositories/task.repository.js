@@ -22,6 +22,17 @@ export const taskRepository = {
       where: { idProject }
     });
   },
+  
+  /**
+   * Busca un nodo por su ID
+   * @param {number} id - ID del nodo
+   * @returns {Promise<Object|null>} El nodo o null si no existe
+   */
+  async findNodeById(id) {
+    return await prisma.archivo.findUnique({
+      where: { id }
+    });
+  },
 
   /**
    * Busca todas las aristas (relaciones) cuyo fromId se encuentre en un arreglo dado
