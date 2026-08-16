@@ -44,12 +44,15 @@ Los controladores son el puente entre las rutas y los servicios. Su trabajo es e
 - **`auth.controller.js`**: Extrae el email y la contraseña enviados por el usuario y se los pasa al servicio de autenticación. Devuelve el token JWT si el proceso es exitoso.
 - **`project.controller.js`**: Extrae el ID del usuario del token JWT para buscar o crear proyectos que solo le pertenezcan a él.
 - **`task.controller.js`**: Maneja las solicitudes de los nodos (tareas) y aristas (relaciones). Por ejemplo, al actualizar el estado de una tarea, extrae el nuevo estado del body y el ID de la tarea desde la URL.
+- **`subscription.controller.js`**: Flujo de checkout simulado, cancelación y rebaja (downgrade) de planes de precios.
+- **`factura.controller.js`**: Listado y visualización de facturas PDF.
 
 ## 3. Servicios (`services/`)
 Los servicios contienen toda la "Lógica de Negocio". Si hay reglas en la aplicación (como "una tarea no puede relacionarse consigo misma" o "no puedes crear un usuario con un email que ya existe"), se validan aquí.
 - **`auth.service.js`**: Valida las contraseñas comparándolas con la BD, hashea las contraseñas nuevas usando `bcrypt` al registrar un usuario, y genera el token de sesión usando `jwt`.
 - **`project.service.js`**: Contiene la lógica para crear y borrar proyectos. Si borra un proyecto, también se encarga de llamar a los repositorios para borrar en cascada todas las tareas y relaciones que estaban dentro de ese proyecto.
 - **`task.service.js`**: Realiza validaciones de negocio sobre las tareas, como asegurarse de que el estado ingresado por el usuario sea estrictamente uno válido ("No Iniciado", "En Progreso", "Completado").
+- **`billing.service.js`**: El núcleo de la monetización. Calcula las fechas de vencimiento, maneja los prorrateos (ej. regalos de 7 días al actualizar de plan mensual a anual) y coordina la creación de facturas Tipo A (con IVA desglosado) o Tipo B (consumidor final).
 
 ## 4. Repositorios (`repositories/`)
 Esta capa es la **única** que habla directamente con la base de datos a través de Prisma. Sirve para que el resto de la aplicación (los servicios) no necesite saber qué base de datos estamos usando ni su sintaxis.

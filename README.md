@@ -1,4 +1,4 @@
-# Gestor de Proyectos
+# Gestor de Proyectos (con Monetización)
 
 Una plataforma integral diseñada para organizar tu flujo de trabajo mediante un sistema jerárquico y visual. Permite gestionar **proyectos, tareas y subtareas** conectadas entre sí, representadas de manera interactiva mediante un **grafo**.
 
@@ -7,15 +7,13 @@ Una plataforma integral diseñada para organizar tu flujo de trabajo mediante un
 *   **Estructura basada en Grafos:**
     Visualiza la relación entre tus proyectos, tareas y subtareas a través de una página renderizada con un formato de grafos.
 *   **Creación y Gestión Jerárquica:**
-    Permite darle un nombre específico y gestionar fácilmente tus recursos en los distintos niveles:
-    *   Proyectos
-    *   Tareas
-    *   Subtareas
+    Permite darle un nombre específico y gestionar fácilmente tus recursos en los distintos niveles (Proyectos, Tareas, Subtareas).
 *   **Gestión de Estados:**
-    Haz seguimiento del progreso asignando estados a cada tarea y subtarea:
-    *   🔴 *No iniciado*
-    *   🟡 *En Progreso*
-    *   🟢 *Completado*
+    Haz seguimiento del progreso asignando estados (No iniciado, En Progreso, Completado).
+*   **Monetización y Suscripciones:**
+    Sistema de planes de precios (Gratis, Advanced, Pro, Unlimited). Los usuarios pueden mejorar, rebajar o cancelar suscripciones con facturación aditiva y prorrateo antifraude.
+*   **Facturación Automática:**
+    Generación automática de facturas en formato PDF tras cada pago. Soporte para Factura A (Responsable Inscripto) con desglose de IVA y Factura B (Consumidor Final).
 
 ## Interfaz de Usuario (UI) y Experiencia (UX)
 

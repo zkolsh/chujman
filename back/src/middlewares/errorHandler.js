@@ -21,8 +21,14 @@ export const errorHandler = (err, req, res, next) => {
 		'No autorizado': 401
 	};
 
-	const status = errorMap[err.message] || 500;
-	const message = status === 500 ? 'Error interno del servidor' : err.message;
+	let status = errorMap[err.message] || 500;
+	let message = status === 500 ? 'Error interno del servidor' : err.message;
+
+    // Preserve dynamic limit messages
+    if (err.message && err.message.includes('Límite de proyectos alcanzado')) {
+        status = 403;
+        message = err.message;
+    }
 
 	res.status(status).json({
 		success: false,

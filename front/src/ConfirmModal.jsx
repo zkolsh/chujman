@@ -28,7 +28,7 @@ import React from 'react';
  * />
  */
 
-function ConfirmModal({ isOpen, title, message, confirmText, cancelText, onConfirm, onCancel, isDanger }) {
+function ConfirmModal({ isOpen, title, message, confirmText, cancelText, onConfirm, onCancel, isDanger, hideCancel = false }) {
   if (!isOpen) return null;
 
   return (
@@ -41,12 +41,14 @@ function ConfirmModal({ isOpen, title, message, confirmText, cancelText, onConfi
           <p className="text-sm text-slate-600 leading-relaxed">{message}</p>
         </div>
         <div className="px-6 py-4 flex justify-end space-x-3 bg-slate-50/50 border-t border-slate-50">
-          <button
-            onClick={onCancel}
-            className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200"
-          >
-            {cancelText || 'Cancelar'}
-          </button>
+          {!hideCancel && (
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 text-sm font-medium text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200"
+            >
+              {cancelText || 'Cancelar'}
+            </button>
+          )}
           <button
             onClick={onConfirm}
             className={`px-4 py-2 text-sm font-medium text-white rounded-md transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-offset-1 ${isDanger ? 'bg-red-600 hover:bg-red-700 focus:ring-red-600' : 'bg-slate-900 hover:bg-slate-800 focus:ring-slate-900'}`}

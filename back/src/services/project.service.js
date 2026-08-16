@@ -4,6 +4,7 @@
 
 import { projectRepository } from '../repositories/project.repository.js';
 import { taskRepository } from '../repositories/task.repository.js';
+import usuarioRepository from '../repositories/usuario.repository.js';
 
 /**
  * Servicio de proyectos
@@ -24,7 +25,7 @@ export const projectService = {
   },
 
   /**
-   * Crea un nuevo proyecto en la base de datos
+   * Crea un nuevo proyecto en la base de datos validando los límites del plan
    * 
    * @param {number} userId - ID del usuario creador
    * @param {Object} data - Datos del proyecto
@@ -34,6 +35,22 @@ export const projectService = {
    */
 
   async createProject(userId, data) {
+    const user = await usuarioRepository.findById(userId);
+    if (!user) throw new Error('Usuario no encontrado');
+
+    const limitMap = {
+      'Gratis': 3,
+      'Advanced': 10,
+      'Pro': 15,
+      'Unlimited': Infinity
+    };
+    const limit = limitMap[user.nivelSuscripcion] || 3;
+
+    const projects = await projectRepository.findManyByUserId(userId);
+    if (projects.length >= limit) {
+      throw new Error(`Límite de proyectos alcanzado para tu plan (${user.nivelSuscripcion}).`);
+    }
+
     return await projectRepository.create({
       ...data,
       userId

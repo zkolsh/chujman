@@ -31,3 +31,12 @@ d- Si conectas una nueva subtarea a una tarea completada, el padre pasará autom
 8. Al cargar el tablero, las tareas se posicionan según sus coordenadas guardadas en la base de datos.
 9. Al mover (arrastrar) una tarea en el grafo, su nueva posición se guarda automáticamente en la base de datos.
 10. Añadido Deadlines a las tareas
+
+Changeset 23/8:
+1. Monetización: Se implementó un sistema de suscripciones con 4 niveles (Gratis, Advanced, Pro, Unlimited) y opciones de pago mensual o anual.
+
+Dependiendo del plan tendrás distintos beneficios; lo que cambia principalmente es el número de proyectos que podés crear y las opciones cosméticas.
+
+2. Se agregó la ventana perfil, a partir de la cual podés, principalmente, ver el estado de tu suscripción, modificarla y cambiar tu nombre de usuario.
+
+3. Al pagar por una suscripción tendrás que ingresar tus datos y luego se generará una factura B o A dependiendo de tu situación tributaria, la cual podrás descargar desde la pestaña perfil.

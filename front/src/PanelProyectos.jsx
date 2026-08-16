@@ -14,7 +14,7 @@ import ConfirmModal from './ConfirmModal';
  * @returns {JSX.Element}
  */
 
-function PanelProyectos({ onSelectProject, onLogout }) {
+function PanelProyectos({ onSelectProject, onLogout, onGoToProfile, onUpgrade }) {
   const [projects, setProjects] = useState([]);
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -71,7 +71,21 @@ function PanelProyectos({ onSelectProject, onLogout }) {
         setDescription('');
         fetchProjects();
       } else {
-        setErrorMsg(data.message || 'Error al crear proyecto');
+        if (data.message && data.message.includes('Límite')) {
+          setConfirmConfig({
+            isOpen: true,
+            title: '¡Límite Alcanzado!',
+            message: 'Parece que ya usaste todos los proyectos de tu plan actual. Si necesitas más capacidad, puedes suscribirte a un plan superior y seguir creando al instante.',
+            confirmText: 'Ver Planes Disponibles',
+            isDanger: false,
+            onConfirm: () => {
+              setConfirmConfig({ ...confirmConfig, isOpen: false });
+              if (onUpgrade) onUpgrade();
+            }
+          });
+        } else {
+          setErrorMsg(data.message || 'Error al crear proyecto');
+        }
       }
     } catch (err) {
       setErrorMsg('Error de red al crear proyecto');
@@ -119,6 +133,12 @@ function PanelProyectos({ onSelectProject, onLogout }) {
             Hola, <span className="text-white">{localStorage.getItem('userName') || 'Usuario'}</span>
           </span>
           <button
+            onClick={onGoToProfile}
+            className="inline-flex items-center justify-center rounded-md text-xs font-semibold transition-colors border border-slate-700 bg-transparent hover:bg-slate-800 text-slate-300 hover:text-white h-8 px-4"
+          >
+            Mi Perfil
+          </button>
+          <button
             onClick={onLogout}
             className="inline-flex items-center justify-center rounded-md text-xs font-semibold transition-colors border border-slate-700 bg-slate-800 hover:bg-slate-700 text-white h-8 px-4"
           >
@@ -163,6 +183,14 @@ function PanelProyectos({ onSelectProject, onLogout }) {
                     className="flex min-h-[80px] w-full rounded-md border border-slate-200 bg-transparent px-3 py-2 text-sm shadow-sm placeholder:text-slate-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950"
                   />
                 </div>
+                
+                {errorMsg && !errorMsg.includes('Límite') && (
+                  <div className="p-3 rounded-md text-sm border bg-red-50 border-red-200 text-red-600">
+                    <p className="font-medium">Ocurrió un error</p>
+                    <p className="mt-1">{errorMsg}</p>
+                  </div>
+                )}
+
                 <button
                   type="submit"
                   className="inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-slate-950 bg-slate-900 text-slate-50 hover:bg-slate-900/90 h-9 px-4 py-2 w-full shadow"

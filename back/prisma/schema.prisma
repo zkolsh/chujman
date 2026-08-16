@@ -16,9 +16,15 @@ model User {
   password	String
   name  String
   role	String	@default("USER")
+  nivelSuscripcion String @default("Gratis")
+  fechaVencimientoSuscripcion DateTime?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  bannerColor String @default("#1e293b")
+  suscripcionCancelada Boolean @default(false)
+  nextNivelSuscripcion String?
   projects  Project[]
+  facturas  Factura[]
 }
 
 model Project {
@@ -49,4 +55,25 @@ model ArchivoRelacion {
   toId  Int
   from  Archivo @relation("from", fields: [fromId], references: [id], onDelete: Cascade)
   to    Archivo @relation("to", fields: [toId], references: [id], onDelete: Cascade)
+}
+
+model Factura {
+  id        Int      @id @default(autoincrement())
+  tipo      String
+  cuit      String?
+  nombreFacturacion String?
+  montoNeto Float
+  iva       Float
+  total     Float
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+}
+
+model AsientoContable {
+  id        Int      @id @default(autoincrement())
+  concepto  String
+  monto     Float
+  tipoCuenta String 
+  createdAt DateTime @default(now())
 }
