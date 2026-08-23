@@ -7,6 +7,7 @@ import { ReactFlow, MiniMap, Controls, Background, useNodesState, useEdgesState,
 import '@xyflow/react/dist/style.css';
 import ConfirmModal from './ConfirmModal';
 import TaskNode from './TaskNode';
+import TaskDetailPane from './TaskDetailPane';
 
 const nodeTypes = { taskNode: TaskNode };
 
@@ -28,6 +29,7 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
   const [projectsList, setProjectsList] = useState([]);
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
 
   const [loadingTasks, setLoadingTasks] = useState(true);
   const [isCreateProjectModalOpen, setIsCreateProjectModalOpen] = useState(false);
@@ -106,11 +108,14 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
           type: 'taskNode',
           position: { x: n.x ?? (250 + (i * 20)), y: n.y ?? (100 + (i * 20)) },
           data: {
+            id: n.id,
             texto: n.texto,
+            descripcion: n.descripcion,
             estado: n.estado,
             deadline: n.deadline,
             onUpdate: handleUpdateNode,
-            onDelete: handleDeleteNode
+            onDelete: handleDeleteNode,
+            onSelectNode: (id) => setSelectedNodeId(String(id))
           }
         }));
 
@@ -145,12 +150,16 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
           type: 'taskNode',
           position: { x: newNode.x ?? (window.innerWidth / 2 - 100), y: newNode.y ?? (window.innerHeight / 2 - 100) },
           data: {
+            id: newNode.id,
             texto: newNode.texto,
+            descripcion: newNode.descripcion,
             estado: newNode.estado,
             onUpdate: handleUpdateNode,
-            onDelete: handleDeleteNode
+            onDelete: handleDeleteNode,
+            onSelectNode: (id) => setSelectedNodeId(String(id))
           }
         }]);
+        setSelectedNodeId(String(newNode.id));
       }
     } catch (err) { console.error(err); }
   };
@@ -364,6 +373,9 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
       isDanger: true,
       onConfirm: async () => {
         setConfirmConfig(prev => ({ ...prev, isOpen: false }));
+        if (selectedNodeId === String(nodeId)) {
+          setSelectedNodeId(null);
+        }
         setNodes(nds => nds.filter(n => n.id !== nodeId));
         setEdges(eds => eds.filter(e => e.source !== nodeId && e.target !== nodeId));
 
@@ -421,6 +433,10 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
       } catch (err) { console.error(err); }
     });
   }, [project.id]);
+
+  const selectedNode = useMemo(() => {
+    return nodes.find(n => n.id === selectedNodeId);
+  }, [nodes, selectedNodeId]);
 
   return (
     <div className="flex h-screen bg-slate-50 font-sans overflow-hidden">
@@ -504,6 +520,8 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
               onConnect={onConnect}
               onEdgesDelete={onEdgesDelete}
               onNodeDragStop={onNodeDragStop}
+              onNodeClick={(_event, node) => setSelectedNodeId(String(node.id))}
+              onPaneClick={() => setSelectedNodeId(null)}
               nodeTypes={nodeTypes}
               fitView
               minZoom={0.2}
@@ -524,7 +542,17 @@ export default function TableroProyecto({ project, onSelectProject, onBackToDash
           )}
         </div>
 
-        <button onClick={onEasterEgg} className="fixed bottom-4 right-4 w-8 h-8 opacity-0 hover:opacity-10 transition-opacity bg-amber-500 rounded-full cursor-pointer z-50" />
+        {selectedNode && (
+          <TaskDetailPane
+            key={selectedNode.id}
+            node={selectedNode}
+            onClose={() => setSelectedNodeId(null)}
+            onUpdate={handleUpdateNode}
+            onDelete={handleDeleteNode}
+          />
+        )}
+
+        <button onClick={onEasterEgg} className="fixed bottom-4 right-4 w-8 h-8 opacity-0 hover:opacity-10 transition-opacity bg-amber-500 rounded-full cursor-pointer z-30" />
       </main>
 
       <ConfirmModal

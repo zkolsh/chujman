@@ -29,6 +29,32 @@ export const getProjectTasks = async (req, res, next) => {
 };
 
 /**
+ * Obtiene una tarea específica por su ID
+ * 
+ * @param {Object} req - Objeto de petición de Express
+ * @param {Object} req.params - Parámetros de la ruta
+ * @param {string} req.params.taskId - ID de la tarea
+ * @param {Object} res - Objeto de respuesta de Express
+ * @param {Function} next - Función para manejo de errores
+ * @returns {Promise<void>} JSON con la tarea encontrada
+ */
+
+export const getTask = async (req, res, next) => {
+  try {
+    const { taskId } = req.params;
+    const task = await taskService.getTaskById(parseInt(taskId));
+
+    if (!task) {
+      return res.status(404).json({ success: false, message: 'Tarea no encontrada' });
+    }
+
+    res.status(200).json({ success: true, data: task });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * Crea una nueva tarea (nodo) en un proyecto
  * 
  * @param {Object} req - Objeto de petición de Express
@@ -36,6 +62,9 @@ export const getProjectTasks = async (req, res, next) => {
  * @param {string} req.params.projectId - ID del proyecto
  * @param {Object} req.body - Cuerpo de la petición
  * @param {string} [req.body.texto] - Texto de la nueva tarea
+ * @param {string} [req.body.estado] - Estado inicial de la tarea
+ * @param {string} [req.body.descripcion] - Descripción de la nueva tarea
+ * @param {string} [req.body.descrpcion] - Descripción de la nueva tarea (alias)
  * @param {Object} res - Objeto de respuesta de Express
  * @param {Function} next - Función para manejo de errores
  * @returns {Promise<void>} JSON con la tarea creada
@@ -44,9 +73,10 @@ export const getProjectTasks = async (req, res, next) => {
 export const createProjectTask = async (req, res, next) => {
   try {
     const { projectId } = req.params;
-    const { texto } = req.body;
+    const { texto, estado, descripcion, descrpcion } = req.body;
+    const desc = descripcion !== undefined ? descripcion : descrpcion;
 
-    const newNode = await taskService.createProjectTask(parseInt(projectId), texto);
+    const newNode = await taskService.createProjectTask(parseInt(projectId), texto, estado || 'No Iniciado', desc);
 
     res.status(201).json({ success: true, data: newNode });
   } catch (error) {
@@ -90,6 +120,8 @@ export const deleteTask = async (req, res, next) => {
  * @param {Object} req.body - Cuerpo de la petición
  * @param {string} [req.body.texto] - Nuevo texto de la tarea
  * @param {string} [req.body.estado] - Nuevo estado de la tarea
+ * @param {string} [req.body.descripcion] - Nueva descripción de la tarea
+ * @param {string} [req.body.descrpcion] - Nueva descripción de la tarea (alias)
  * @param {Object} res - Objeto de respuesta de Express
  * @param {Function} next - Función para manejo de errores
  * @returns {Promise<void>} JSON con la tarea actualizada
@@ -98,15 +130,16 @@ export const deleteTask = async (req, res, next) => {
 export const updateTask = async (req, res, next) => {
   try {
     const { taskId } = req.params;
-    // Extract deadline from req.body
-    const { texto, estado, x, y, deadline } = req.body; 
+    const { texto, estado, x, y, deadline, descripcion, descrpcion } = req.body; 
 
     const result = await taskService.updateTask(parseInt(taskId), { 
       texto, 
       estado, 
       x, 
       y, 
-      deadline 
+      deadline,
+      descripcion,
+      descrpcion
     });
 
     res.status(200).json({ success: true, data: result });

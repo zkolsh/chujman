@@ -112,3 +112,35 @@
     background: var(--code-bg);
   }
 }
+
+/* Fix @uiw/react-md-editor textarea and syntax highlighter overlay alignment */
+.w-md-editor {
+  letter-spacing: normal !important;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+}
+
+.w-md-editor-text-pre,
+.w-md-editor-text-input,
+.w-md-editor-text {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  letter-spacing: normal !important;
+  tab-size: 2 !important;
+  word-break: break-word !important;
+}
+
+.w-md-editor-text-pre > code,
+.w-md-editor-text-pre > code span {
+  font-family: inherit !important;
+  font-size: inherit !important;
+  line-height: inherit !important;
+  letter-spacing: normal !important;
+}
+
+.w-md-editor-text-input {
+  letter-spacing: normal !important;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+}

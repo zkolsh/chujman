@@ -27,34 +27,62 @@ export const taskService = {
   },
 
   /**
+   * Obtiene una tarea específica por su ID
+   * 
+   * @param {number} id - ID de la tarea
+   * @returns {Promise<Object|null>} Tarea encontrada o null
+   */
+  async getTaskById(id) {
+    return await taskRepository.findNodeById(id);
+  },
+
+  /**
    * Crea una nueva tarea asociada a un proyecto
    * 
    * @param {number} idProject - ID del proyecto
-   * @param {string} texto - Descripción de la tarea
+   * @param {string|Object} textoOrData - Título/texto de la tarea o un objeto con los datos
    * @param {string} [estado='No Iniciado'] - Estado inicial de la tarea
+   * @param {string|null} [descripcion=null] - Contenido/descripción opcional de la tarea
    * @returns {Promise<Object>} Nodo creado
    * @throws {Error} Si falta el texto
    */
 
-  async createProjectTask(idProject, texto, estado = 'No Iniciado') {
+  async createProjectTask(idProject, textoOrData, estado = 'No Iniciado', descripcion = null) {
+    let texto = textoOrData;
+    let state = estado;
+    let desc = descripcion;
+
+    if (typeof textoOrData === 'object' && textoOrData !== null) {
+      texto = textoOrData.texto;
+      state = textoOrData.estado || 'No Iniciado';
+      desc = textoOrData.descripcion !== undefined ? textoOrData.descripcion : textoOrData.descrpcion;
+    }
+
     if (!texto || !texto.trim()) {
       throw new Error('El texto es obligatorio');
     }
 
-    return await taskRepository.createNode({
+    const nodeData = {
       idProject,
       texto,
-      estado
-    });
+      estado: state
+    };
+
+    if (desc !== undefined && desc !== null) {
+      nodeData.descripcion = desc;
+    }
+
+    return await taskRepository.createNode(nodeData);
   },
 
   /**
-   * Actualiza los datos de una tarea (texto o estado)
+   * Actualiza los datos de una tarea (texto, estado, posición, deadline o descripción)
    * 
    * @param {number} id - ID de la tarea
    * @param {Object} data - Datos a actualizar
    * @param {string} [data.texto] - Nuevo texto
    * @param {string} [data.estado] - Nuevo estado
+   * @param {string} [data.descripcion] - Nueva descripción/contenido
    * @returns {Promise<Object>} Nodo actualizado
    * @throws {Error} Si el estado proporcionado no es válido
    */
@@ -70,6 +98,11 @@ export const taskService = {
     if (data.estado !== undefined) updateData.estado = data.estado;
     if (data.x !== undefined) updateData.x = data.x;
     if (data.y !== undefined) updateData.y = data.y;
+
+    const desc = data.descripcion !== undefined ? data.descripcion : data.descrpcion;
+    if (desc !== undefined) {
+      updateData.descripcion = desc;
+    }
 
     // Handle Deadline Update and Cascade
     if (data.deadline !== undefined) {

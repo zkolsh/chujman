@@ -41,6 +41,7 @@ model Archivo {
   idProject Int
   id    Int @id @default(autoincrement())
   texto String?
+  descripcion String?
   estado String @default("No Iniciado")
   from  ArchivoRelacion[] @relation("from")
   to    ArchivoRelacion[] @relation("to")

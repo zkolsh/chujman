@@ -1,10 +1,7 @@
-/**
- * @fileoverview Área de trabajo principal para visualizar e interactuar con el grafo de tareas
- */
-
-import React, { useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { ReactFlow, MiniMap, Controls, Background, useNodesState, useEdgesState, addEdge } from '@xyflow/react';
 import TaskNode from './TaskNode';
+import TaskDetailPane from './TaskDetailPane';
 
 import '@xyflow/react/dist/style.css';
 
@@ -21,20 +18,45 @@ const nodeTypes = { taskNode: TaskNode };
  * @returns {JSX.Element}
  */
 
-export default function GraphWorkspace({ initialArchivos, initialRelaciones, onSyncWithDatabase }) {
+export default function GraphWorkspace({ initialArchivos = [], initialRelaciones = [], onSyncWithDatabase }) {
+  const [selectedNodeId, setSelectedNodeId] = useState(null);
+
+  const handleUpdateNode = useCallback((nodeId, updates) => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === String(nodeId)) {
+          return { ...node, data: { ...node.data, ...updates } };
+        }
+        return node;
+      })
+    );
+  }, []);
+
+  const handleDeleteNode = useCallback((nodeId) => {
+    if (selectedNodeId === String(nodeId)) {
+      setSelectedNodeId(null);
+    }
+    setNodes((nds) => nds.filter((node) => node.id !== String(nodeId)));
+    setEdges((eds) => eds.filter((edge) => edge.source !== String(nodeId) && edge.target !== String(nodeId)));
+  }, [selectedNodeId]);
+
   const mappedNodes = useMemo(() => {
     return initialArchivos.map((archivo) => ({
       id: String(archivo.id),
       type: 'taskNode',
-      position: { x: Math.random() * 400, y: Math.random() * 400 },
+      position: { x: archivo.x ?? Math.random() * 400, y: archivo.y ?? Math.random() * 400 },
       data: {
         id: archivo.id,
-        label: archivo.texto || `Node #${archivo.id}`,
-        estado: archivo.estado,
-        onStatusChange: (id, newEstado) => handleStatusUpdate(id, newEstado)
+        texto: archivo.texto || `Node #${archivo.id}`,
+        descripcion: archivo.descripcion || '',
+        estado: archivo.estado || 'No Iniciado',
+        deadline: archivo.deadline || null,
+        onUpdate: handleUpdateNode,
+        onDelete: handleDeleteNode,
+        onSelectNode: (id) => setSelectedNodeId(String(id))
       }
     }));
-  }, [initialArchivos]);
+  }, [initialArchivos, handleUpdateNode, handleDeleteNode]);
 
   const mappedEdges = useMemo(() => {
     return initialRelaciones.map((rel) => ({
@@ -48,17 +70,6 @@ export default function GraphWorkspace({ initialArchivos, initialRelaciones, onS
 
   const [nodes, setNodes, onNodesChange] = useNodesState(mappedNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(mappedEdges);
-
-  const handleStatusUpdate = (nodeId, newEstado) => {
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.data.id === nodeId) {
-          return { ...node, data: { ...node.data, estado: newEstado } };
-        }
-        return node;
-      })
-    );
-  };
 
   const onConnect = useCallback(
     (params) => {
@@ -77,22 +88,46 @@ export default function GraphWorkspace({ initialArchivos, initialRelaciones, onS
     []
   );
 
+  const selectedNode = useMemo(() => {
+    return nodes.find(n => n.id === selectedNodeId);
+  }, [nodes, selectedNodeId]);
+
   return (
-    <div className="w-screen h-screen bg-slate-950 text-slate-100 flex flex-col">
-      <header className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center">
-        {/* <h1 className="text-xl font-bold tracking-tight text-white">Project Graph Prototype</h1> */}
-        <button onClick={() => onSyncWithDatabase({ nodes, edges })} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm font-semibold transition" >
+    <div className="w-screen h-screen bg-slate-950 text-slate-100 flex flex-col relative overflow-hidden">
+      <header className="p-4 bg-slate-900 border-b border-slate-800 flex justify-between items-center z-10">
+        <button onClick={() => onSyncWithDatabase?.({ nodes, edges })} className="px-4 py-2 bg-blue-600 hover:bg-blue-500 rounded text-sm font-semibold transition" >
           Guardar Topologia
         </button>
       </header>
 
       <div className="flex-1 w-full h-full">
-        <ReactFlow nodes={nodes} edges={edges} onNodesChange={onNodesChange} onEdgesChange={onEdgesChange} onConnect={onConnect} onEdgesDelete={onEdgesDelete} nodeTypes={nodeTypes} fitView >
+        <ReactFlow
+          nodes={nodes}
+          edges={edges}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onConnect={onConnect}
+          onEdgesDelete={onEdgesDelete}
+          onNodeClick={(_event, node) => setSelectedNodeId(String(node.id))}
+          onPaneClick={() => setSelectedNodeId(null)}
+          nodeTypes={nodeTypes}
+          fitView
+        >
           <Controls className="bg-slate-900 border border-slate-700 text-slate-200 fill-slate-200" />
           <MiniMap nodeColor="#1e293b" backgroundColor="#020617" maskColor="rgba(0,0,0,0.3)" />
           <Background color="#334155" gap={16} size={1} />
         </ReactFlow>
       </div>
+
+      {selectedNode && (
+        <TaskDetailPane
+          key={selectedNode.id}
+          node={selectedNode}
+          onClose={() => setSelectedNodeId(null)}
+          onUpdate={handleUpdateNode}
+          onDelete={handleDeleteNode}
+        />
+      )}
     </div>
   );
 }
